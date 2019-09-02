@@ -684,6 +684,12 @@ def main():
         cv2.destroyWindow(WINDOW_NAME) #close the window
 
 def mainForTraining():
+    """" 
+    En esta sección comienza la aplicación
+    
+    """"
+
+
     import pygamestuff
     crosshair = pygamestuff.Crosshair([7, 2], quadratic = False)
     vc = cv2.VideoCapture(0) # Initialize the default camera
@@ -731,7 +737,7 @@ def mainForTraining():
                     crosshair.drawCrossAt((gazeCoords[0,0], gazeCoords[0,1]))
                     print(gazeCoords[0,0], gazeCoords[0,1])
                     coords.append({
-                    'fixation_number': fixations, 'x': gazeCoords[0,0],'y': gazeCoords[0,1]
+                    'fixation_number': fixations, 'x': gazeCoords[0,0],'y': gazeCoords[0,1] #las fijaciones son los puntos que detecta la aplicacion que un usuario mira
                 })
                     fixations += 1
             readSuccessful, frame = vc.read()
@@ -758,12 +764,17 @@ def mainForTraining():
         makeModel(coords)
 
 def makeModel(coords):
+    """"
+    El modelo es la unión de las zonas que se etiquetaron y las fijaciones
+
+    """"
+
     segmentation = aois
     functions = {}
     relations = []
     print(coords)
     print(segmentation)
-    for index_fixation, row in enumerate(coords):
+    for index_fixation, row in enumerate(coords): #se verificar cuáles fijaciones se encuentran dentro de las zonas que se definieron y si es así se agregan al modelo
         relations.append((index_fixation, index_fixation + 1))
         for index_segment, segment in enumerate(segmentation):
             if (float(row['x']) >= float(segment['x0']) and float(row['x']) <= float(segment['x1'])):
@@ -778,6 +789,11 @@ def makeModel(coords):
     relations.append((len(relations), len(relations)))
 
     def getResult(relations,functions):
+        """"
+        Una vez que se tiene el modelo, se le pide al usuario la fórmula que es la que se va a ocupar para verificar si se cumple o no
+
+        """"
+
         phi = theformula.get()
         K = Kripke(R=relations, L=functions)
         print(K)
@@ -835,6 +851,9 @@ def makeModel(coords):
 
 
 class App(tk.Frame):
+    """" 
+    En esta parte inicia el canvas para poder seleccionar mediante el mouse, las áreas de interés (rectángulos)
+    """"
     def __init__( self, parent):
         tk.Frame.__init__(self, parent)
         self._createVariables(parent)
@@ -891,6 +910,12 @@ class App(tk.Frame):
             print('Rectangle x1, y1 = ', self.rectx1, self.recty1)
 
     def stopRect(self, event):
+        """" 
+        Una vez que se termina de seleccionar el área, se muestra la pantalla de tkinter dónde se debe ingresar el nombre del área
+        
+        """"
+
+
         self.move = False
         #Translate mouse screen x1,y1 coordinates to canvas coordinates
         self.rectx1 = self.canvas.canvasx(event.x)
@@ -909,6 +934,13 @@ class App(tk.Frame):
         userEntry.grid(row = 0, column = 1)
 
         def addAOI():
+            """"
+            Se agrega al JSON el elemento con el nombre y sus coordenadas
+            """"
+
+
+
+
             string_answer = userEntry.get()
             item = {
             'x0': self.rectx0, 'y0': self.recty0,
@@ -927,6 +959,12 @@ class App(tk.Frame):
             main()
 
         def saveJson():
+            """"
+            Una ves que se terminaron de elegir los elementos, se guardan en un archivo Json
+            La idea es que con esa misma selección de elementos se puedan hacer distintas pruebas
+            Si es posible, que una vez que se seleccionar, se puedan volver a utilzar en otros experimentos
+            """"
+
             with open('data.json', 'w') as outfile:
                 json.dump(aois, outfile)
                 alert = tk.Tk()
