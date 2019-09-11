@@ -684,10 +684,10 @@ def main():
         cv2.destroyWindow(WINDOW_NAME) #close the window
 
 def mainForTraining():
-    """" 
+    """ 
     En esta sección comienza la aplicación
     
-    """"
+    """
 
 
     import pygamestuff
@@ -764,10 +764,10 @@ def mainForTraining():
         makeModel(coords)
 
 def makeModel(coords):
-    """"
+    """
     El modelo es la unión de las zonas que se etiquetaron y las fijaciones
 
-    """"
+    """
 
     segmentation = aois
     functions = {}
@@ -789,10 +789,10 @@ def makeModel(coords):
     relations.append((len(relations), len(relations)))
 
     def getResult(relations,functions):
-        """"
+        """
         Una vez que se tiene el modelo, se le pide al usuario la fórmula que es la que se va a ocupar para verificar si se cumple o no
 
-        """"
+        """
 
         phi = theformula.get()
         K = Kripke(R=relations, L=functions)
@@ -851,9 +851,9 @@ def makeModel(coords):
 
 
 class App(tk.Frame):
-    """" 
+    """ 
     En esta parte inicia el canvas para poder seleccionar mediante el mouse, las áreas de interés (rectángulos)
-    """"
+    """
     def __init__( self, parent):
         tk.Frame.__init__(self, parent)
         self._createVariables(parent)
@@ -910,10 +910,10 @@ class App(tk.Frame):
             print('Rectangle x1, y1 = ', self.rectx1, self.recty1)
 
     def stopRect(self, event):
-        """" 
+        """
         Una vez que se termina de seleccionar el área, se muestra la pantalla de tkinter dónde se debe ingresar el nombre del área
         
-        """"
+        """
 
 
         self.move = False
@@ -934,9 +934,9 @@ class App(tk.Frame):
         userEntry.grid(row = 0, column = 1)
 
         def addAOI():
-            """"
+            """
             Se agrega al JSON el elemento con el nombre y sus coordenadas
-            """"
+            """
 
 
 
@@ -959,11 +959,11 @@ class App(tk.Frame):
             main()
 
         def saveJson():
-            """"
+            """
             Una ves que se terminaron de elegir los elementos, se guardan en un archivo Json
             La idea es que con esa misma selección de elementos se puedan hacer distintas pruebas
             Si es posible, que una vez que se seleccionar, se puedan volver a utilzar en otros experimentos
-            """"
+            """
 
             with open('data.json', 'w') as outfile:
                 json.dump(aois, outfile)
