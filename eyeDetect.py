@@ -727,7 +727,7 @@ def mainForTraining():
                         featuresAndLabels = np.concatenate( (features, resultXYpxpy[:,-2:] ) , axis=1)
                         HT = RANSACFitTransformation(featuresAndLabels)
                         print (HT)
-                if HT is not None and clicks >= 30: # dibujar el circulo estimando la mirada
+                if HT is not None: # dibujar el circulo estimando la mirada
                     print('ya empieza la estimacion')
                     print(messagebox.askyesnocancel(message="Comenzará la calibración", title="Título"))
 
