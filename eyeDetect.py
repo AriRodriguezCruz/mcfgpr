@@ -728,8 +728,8 @@ def mainForTraining():
                         HT = RANSACFitTransformation(featuresAndLabels)
                         print (HT)
                 if HT is not None: # dibujar el circulo estimando la mirada
-                    print('ya empieza la estimacion')
-                    print(messagebox.askyesnocancel(message="Comenzará la calibración", title="Título"))
+                    #print('ya empieza la estimacion')
+                    #print(messagebox.askyesnocancel(message="Comenzará la calibración", title="Título"))
 
                     fixations = 0
                     currentFeatures = getFeatures( np.array( (pupilOffsetXYList[0], pupilOffsetXYList[1]) ))

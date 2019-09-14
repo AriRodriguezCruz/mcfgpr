@@ -1,0 +1,1 @@
+./gazepattern/manage.py runserver
