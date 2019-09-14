@@ -1,0 +1,4 @@
+{% if widget.label %}
+	<label for="{{ widget.name }}"> {{ widget.label }} </label>
+{% endif %}
+<input type="text" class="field" name="{{ widget.name }}" id="{{ widget.name }}" {% if widget.required == True %}required{% endif %} value="{{ widget.value }}"  autocomplete="off" />  

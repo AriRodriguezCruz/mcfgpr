@@ -5,9 +5,18 @@ from django.shortcuts import render
 # - - -
 #gazepattern
 from utils.views import BaseView
+from eyedetector.forms import ImageForm
 
 class Home(BaseView):
 	template = "eyedetector/home.html"
 
 class Images(BaseView):
 	template = "eyedetector/images.html"
+
+	def get_context(self, request):
+		data = request.GET if request.method == "GET" else request.POST
+		context = {
+			'form': ImageForm,
+			'form_data': data,
+		}
+		return context

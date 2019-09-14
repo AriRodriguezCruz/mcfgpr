@@ -5,4 +5,17 @@
 	<div class="title">
 		Subir y clasificar imagenes.
 	</div>
+	<article class="container">
+		<form action="" method="POST" enctype="multipart/form-data">
+			{% for field in form %}
+				<div class="form-section">
+					{{ field }}
+				</div>
+			{% endfor %}
+			<button type="submit" class="button-form"> Enviar</button>
+		</form>
+		<div class="image-list">
+		
+		</div>
+	</article>
 {% endblock %}

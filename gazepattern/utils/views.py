@@ -19,4 +19,4 @@ class BaseView(View):
 
 	def post(self, request, *args):
 		context = self.get_context(request, *args)
-		return context
+		return render(request, self.template, context)
