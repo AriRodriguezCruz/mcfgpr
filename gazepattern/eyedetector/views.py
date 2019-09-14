@@ -8,3 +8,6 @@ from utils.views import BaseView
 
 class Home(BaseView):
 	template = "eyedetector/home.html"
+
+class Images(BaseView):
+	template = "eyedetector/images.html"
