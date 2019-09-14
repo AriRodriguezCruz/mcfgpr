@@ -4,4 +4,53 @@
 	padding: 0;
 	box-sizing: border-box;
 	font-size: 16px;
+	text-decoration: none;
+	list-style: none;
+}
+
+.header{
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+}
+
+.nav{
+	display: flex;
+	flex-direction: row;
+	transition: 0.2s;
+}
+
+.nav:hover{
+	transform: scale(0.9);
+}
+
+.list-button, .menu-button{
+	border: 1px solid #000;
+	border-radius: 20px;
+	margin: 10px;
+	display: flex;
+	flex-direction: column;
+	align-content: center;
+	justify-content: center;
+	padding: 10px;
+	width: 70px;
+	transition: 0.2s;
+}
+
+.list-button:hover, .menu-button:hover{
+	transform: scale(1.1);
+}
+
+.list-button-text{
+	display: none;
+	text-align: center;
+}
+
+.menu-button-icon, .list-button-icon{
+	width: 50px;
+}
+
+.header-title{
+	font-size: 40px;
+	font-weight: bold;
 }
