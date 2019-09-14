@@ -1,3 +1,4 @@
 *.pyc
 gazepattern/gazepattern/local_settings.py
 *.sqlite3
+gazepattern/media/*
