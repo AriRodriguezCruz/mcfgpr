@@ -1,10 +1,35 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
 	<title>Gaze Pattern</title>
+	<link rel="stylesheet" href="{% static 'css/style.css' %}" />
 </head>
 <body>
-	
+	<header class="header">
+		<ul class="nav">
+			<li class="menu-button">
+				<img src="{% static 'img/eye.png' %}" class="menu-button-icon" />
+			</li>
+			<li class="list-button">
+				<img src="{% static 'img/picture.png' %}" class="list-button-icon" />
+				<li class="list-button-text">Imagenes</li>
+			</li>
+			<li class="list-button">
+				<img src="{% static 'img/experiment.png' %}" alt="" class="list-button-icon" />
+				<li class="list-button-text">Experimento</li>
+			</li>
+			<li class="list-button">
+				<img src="{% static 'img/results.png' %}" alt="" class="list-button-icon" />
+				<li class="list-button-text">Medir Resultados</li>
+			</li>
+		</ul>
+		<div class="title">
+			GAZE PATTERN
+		</div>
+	</header>
+	{% block container %}
+	{% endblock %}
 </body>
 </html>
