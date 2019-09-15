@@ -16,7 +16,25 @@
 			<button type="submit" class="button-form"> Enviar</button>
 		</form>
 		<div class="image-list">
-		
+			{% for image in images %}
+				<div class="image-list-item">
+					<div class="image-list-icon-container">
+						<img src=" {{ image.image.url }} " class="image-list-icon" />
+					</div>
+					<div class="image-list-content">
+						<div class="image-list-name">
+							{{ image.name }}
+						</div>
+						<div class="image-list-description">
+							{{ image.description }}
+						</div>
+					</div>
+					<div class="image-list-content">
+						<a href="{{ image.image.url }}" target="_blank" class="button-form">Descargar</a>
+						<a href="{% url 'clasificar' image.pk %}" target="_blank" class="button-form">Clasificar</a>
+					</div>
+				</div>
+			{% endfor %}
 		</div>
 	</article>
 {% endblock %}

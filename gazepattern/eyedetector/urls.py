@@ -8,6 +8,7 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-	path('', views.Home.as_view(), name="home"),
-	path('images/', views.Images.as_view(), name="images"),
+	path('', views.HomeView.as_view(), name="home"),
+	path('images/', views.ImagesView.as_view(), name="images"),
+	path('clasificar/<int:image_id>/', views.ImageClasificarView.as_view(), name="clasificar")
 ]

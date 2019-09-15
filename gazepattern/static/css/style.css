@@ -83,3 +83,33 @@
 	color: #fff;
 	border-radius: 20px;
 }
+
+.image-list{
+	display: flex;
+	flex-direction: column;
+	margin: 20px 0;
+}
+
+.image-list-item{
+	display: grid;
+	grid-template-columns: 1fr 3fr 1fr;
+	border: 1px solid #000;
+	border-radius: 10px;
+	padding: 15px;
+	margin: 20px 0;
+}
+
+.image-icon-container, .image-list-icon{
+	width: 100%;
+}
+
+.image-list-name{
+	font-size: 25px;
+	font-weight: bold;
+	padding: 5px 10px;
+}
+
+.image-list-description{
+	font-style: 18px;
+	padding: 5px 10px;
+}
