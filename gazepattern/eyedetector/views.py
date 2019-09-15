@@ -2,14 +2,12 @@
 from __future__ import unicode_literals
 from django.shortcuts import render
 #python 
-import tkinter as tk
-from tkinter import Label,Tk
-from PIL import Image, ImageTk
-import PIL.Image
+# - - -
 #gazepattern
 from utils.views import BaseView
 from eyedetector.forms import ImageForm
 from eyedetector.models import Image
+from gui.application import Application
 
 class App(object):
 	"""docstring for App"""
@@ -51,12 +49,10 @@ class ImageClasificarView(BaseView):
 		context = {
 			'image': image,
 		}
+		return context
 
 	def get(self, request, image_id):
 		context = self.get_context(request, image_id)
-		root = tk.Tk()
-		root.geometry( "1000x720" )
-		#root.attributes("-fullscreen", True)
-		app = App(root)
-		root.mainloop()
+		image = context.get('image')
+		app = Application(image.image.file.name)
 		return render(request, self.template, context)
