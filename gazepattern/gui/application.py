@@ -7,17 +7,23 @@ import tkinter as tk
 from tkinter import Label,Tk
 from PIL import Image, ImageTk
 import PIL.Image
+import json
 #gazepattern
+from eyedetector.models import Image, ImageRectangle
 
 
 class Application(object):
 
-    def __init__(self, image_path):
+    def __init__(self, image_path, image):
         root = tk.Tk()
         root.geometry( "1000x720" )
+        self.aois = []
         self.parent = root
         self.path = image_path
+        self.image = image
+        self.move = False
         self._create_canvas()
+        self._create_canvas_binding()
         root.mainloop()
 
     def _create_canvas(self):
@@ -89,45 +95,43 @@ class Application(object):
             Se agrega al JSON el elemento con el nombre y sus coordenadas
             """
 
-
-
-
             string_answer = userEntry.get()
             item = {
             'x0': self.rectx0, 'y0': self.recty0,
             'x1': self.rectx1, 'y1': self.recty1,
             'aoi': string_answer
             }
-            aois.append(item)
-            print(aois)
+
+            self.aois.append(item)
+            print(self.aois)
             close_window()
         
         def close_window(): 
             window.destroy()
 
-        def fnProgram():
-            window.destroy()
-            main()
+        def finish_program():
+            self.parent.destroy()
 
-        def saveJson():
-            """
-            Una ves que se terminaron de elegir los elementos, se guardan en un archivo Json
-            La idea es que con esa misma selección de elementos se puedan hacer distintas pruebas
-            Si es posible, que una vez que se seleccionar, se puedan volver a utilzar en otros experimentos
-            """
-
+        def save_json():
             with open('data.json', 'w') as outfile:
-                json.dump(aois, outfile)
-                alert = tk.Tk()
-        
-                alert.title("Success")
-                label_a = tk.Label(alert, text="The output was saved")
-                label_a.grid(row = 0, column = 0)
-                button_a = tk.Button(alert, text ="Ok", command = fnProgram)
-                button_a.grid(row = 1, column = 0)
+                
+                self.image.rectangles.all().delete()
+                for aoi in self.aois:
+                    rectangle = ImageRectangle()
+                    rectangle.x0 = aoi.get('x0')
+                    rectangle.x1 = aoi.get('x1')
+                    rectangle.y0 = aoi.get('y0')
+                    rectangle.y1 = aoi.get('y1')
+                    rectangle.name = aoi.get('aoi')
+                    rectangle.image = self.image
+                    rectangle.save()
+                    print(rectangle)
+
+                close_window()
+                finish_program()
 
         btn = tk.Button(window, text ="Add", command = addAOI)
         btn.grid(row = 0, column = 3)
-        btn = tk.Button(window, text ="Finish AOI definition", command = saveJson)
+        btn = tk.Button(window, text ="Finish AOI definition", command = save_json)
         btn.grid(row = 1, column = 1)
 

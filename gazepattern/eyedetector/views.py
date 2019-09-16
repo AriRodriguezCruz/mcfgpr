@@ -54,5 +54,5 @@ class ImageClasificarView(BaseView):
 	def get(self, request, image_id):
 		context = self.get_context(request, image_id)
 		image = context.get('image')
-		app = Application(image.image.file.name)
+		app = Application(image.image.file.name, image)
 		return render(request, self.template, context)

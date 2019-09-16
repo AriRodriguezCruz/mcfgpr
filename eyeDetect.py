@@ -938,9 +938,6 @@ class App(tk.Frame):
             Se agrega al JSON el elemento con el nombre y sus coordenadas
             """
 
-
-
-
             string_answer = userEntry.get()
             item = {
             'x0': self.rectx0, 'y0': self.recty0,
