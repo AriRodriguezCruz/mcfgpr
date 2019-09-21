@@ -56,3 +56,14 @@ class ImageClasificarView(BaseView):
 		image = context.get('image')
 		app = Application(image.image.file.name, image)
 		return render(request, self.template, context)
+
+
+class ExperimentView(BaseView):
+
+	template = "eyedetector/experiment.html"
+
+	def get_context(self, request):
+		context = {
+			"images": Image.objects.all()
+		}
+		return context
