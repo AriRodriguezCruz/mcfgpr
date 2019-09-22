@@ -73,6 +73,6 @@ class ExperimentView(BaseView):
 class CheckCameraView(BaseView):
 	template = "generic_template.html"
 
-	def get(self, *args):
+	def get(self, request,  *args):
 		CheckCamera()
-		return render(request, template, locals())
+		return render(request, self.template, locals())

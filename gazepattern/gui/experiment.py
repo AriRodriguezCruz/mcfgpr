@@ -47,13 +47,13 @@ class CheckCamera(object):
                 if key == 27: # exit on ESC
                     #cv2.imwrite( "lastOutput.png", frame) #save the last-displayed image to file, for our report
                     cv2.destroyAllWindows()
-                    mainForTraining()
-                    # break
+                    #mainForTraining()
+                    break
                 # Get Image from camera
                 readSuccessful, frame = vc.read()
         finally:
             vc.release() #close the camera
-            cv2.destroyWindow(self.WINDOW_NAME) #close the window
+            #cv2 class="destroyWin"></cv2>dow(self.WINDOW_NAME) #close the window
 
     def get_offset(self, frame, allowDebugDisplay=True, trackAverageOffset=True, directInferenceLeftRight=True):
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
