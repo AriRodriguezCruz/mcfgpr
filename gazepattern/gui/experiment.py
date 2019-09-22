@@ -399,12 +399,14 @@ class CheckCamera(object):
 
 class Trainning(object):
 
+    readSuccessful = False
+
     def __init__(self, *args, **kwargs):
         from . import pygamestuff
         crosshair = pygamestuff.Crosshair([7, 2], quadratic = False)
         vc = cv2.VideoCapture(0) # Initialize the default camera
         if vc.isOpened(): # try to get the first frame
-            (readSuccessful, frame) = vc.read()
+            (self.readSuccessful, frame) = vc.read()
         else:
             raise(Exception("failed to open camera."))
         MAX_SAMPLES_TO_RECORD = 999999
@@ -414,7 +416,7 @@ class Trainning(object):
             coords = []
             points = 0
             clicks = 0
-            while readSuccessful and recordedEvents < MAX_SAMPLES_TO_RECORD and not crosshair.userWantsToQuit:
+            while self.readSuccessful and recordedEvents < MAX_SAMPLES_TO_RECORD and not crosshair.userWantsToQuit:
                 points += 1
                 pupilOffsetXYList = getOffset(frame, allowDebugDisplay=False)
                 if pupilOffsetXYList is not None: #si se obtienen los dos ojos, espera un click
@@ -429,7 +431,7 @@ class Trainning(object):
                         crosshair.remove()
                         recordedEvents += 1
                         if recordedEvents > RANSAC_MIN_INLIERS:
-                ##      HT = fitTransformation(np.array(crosshair.result))
+                            ##HT = fitTransformation(np.array(crosshair.result))
                             resultXYpxpy =np.array(crosshair.result)
                             features = getFeatures(resultXYpxpy[:,:-2])
                             featuresAndLabels = np.concatenate( (features, resultXYpxpy[:,-2:] ) , axis=1)
@@ -448,7 +450,7 @@ class Trainning(object):
                         'fixation_number': fixations, 'x': gazeCoords[0,0],'y': gazeCoords[0,1] #las fijaciones son los puntos que detecta la aplicacion que un usuario mira
                     })
                         fixations += 1
-                readSuccessful, frame = vc.read()
+                self.readSuccessful, frame = vc.read()
         
             # print ("writing")
             crosshair.write() #writes data to a csv for MATLAB

@@ -681,7 +681,7 @@ def main():
             readSuccessful, frame = vc.read()
     finally:
         vc.release() #close the camera
-        cv2.destroyWindow(WINDOW_NAME) #close the window
+        #cv2.destroyWindow(WINDOW_NAME) #close the window
 
 def mainForTraining():
     """ 
