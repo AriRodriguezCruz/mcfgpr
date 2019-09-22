@@ -8,7 +8,7 @@ from utils.views import BaseView
 from eyedetector.forms import ImageForm
 from eyedetector.models import Image
 from gui.application import Application
-from gui.experiment import CheckCamera
+from gui.experiment import CheckCamera, Trainning
 
 class App(object):
 	"""docstring for App"""
@@ -75,4 +75,12 @@ class CheckCameraView(BaseView):
 
 	def get(self, request,  *args):
 		CheckCamera()
+		return render(request, self.template, locals())
+
+
+class TrainView(BaseView):
+	template = "generic_template.html"
+
+	def get(self, request, *args):
+		Trainning()
 		return render(request, self.template, locals())

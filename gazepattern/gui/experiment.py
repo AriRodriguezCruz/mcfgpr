@@ -395,3 +395,165 @@ class CheckCamera(object):
         extended = True
         upright = True
         self.detector = cv2.xfeatures2d.SURF_create(hessianThreshold, nOctaves, nOctaveLayers, extended, upright)
+
+
+class Trainning(object):
+
+    def __init__(self, *args, **kwargs):
+        from . import pygamestuff
+        crosshair = pygamestuff.Crosshair([7, 2], quadratic = False)
+        vc = cv2.VideoCapture(0) # Initialize the default camera
+        if vc.isOpened(): # try to get the first frame
+            (readSuccessful, frame) = vc.read()
+        else:
+            raise(Exception("failed to open camera."))
+        MAX_SAMPLES_TO_RECORD = 999999
+        recordedEvents=0 #numero de fijaciones
+        HT = None
+        try:
+            coords = []
+            points = 0
+            clicks = 0
+            while readSuccessful and recordedEvents < MAX_SAMPLES_TO_RECORD and not crosshair.userWantsToQuit:
+                points += 1
+                pupilOffsetXYList = getOffset(frame, allowDebugDisplay=False)
+                if pupilOffsetXYList is not None: #si se obtienen los dos ojos, espera un click
+                    if crosshair.pollForClick(): #si hace click se agregan los puntos a la calibracion
+                        clicks += 1
+                        print('clicks '+ str(clicks))
+                        crosshair.clearEvents()
+                        #print( (xOffset,yOffset) )
+                        #do learning here, to relate xOffset and yOffset to screenX,screenY
+                        crosshair.record(pupilOffsetXYList)
+                        print ("recorded something")
+                        crosshair.remove()
+                        recordedEvents += 1
+                        if recordedEvents > RANSAC_MIN_INLIERS:
+                ##      HT = fitTransformation(np.array(crosshair.result))
+                            resultXYpxpy =np.array(crosshair.result)
+                            features = getFeatures(resultXYpxpy[:,:-2])
+                            featuresAndLabels = np.concatenate( (features, resultXYpxpy[:,-2:] ) , axis=1)
+                            HT = RANSACFitTransformation(featuresAndLabels)
+                            print (HT)
+                    if HT is not None: # dibujar el circulo estimando la mirada
+                        #print('ya empieza la estimacion')
+                        #print(messagebox.askyesnocancel(message="Comenzará la calibración", title="Título"))
+
+                        fixations = 0
+                        currentFeatures = getFeatures( np.array( (pupilOffsetXYList[0], pupilOffsetXYList[1]) ))
+                        gazeCoords = currentFeatures.dot(HT)
+                        crosshair.drawCrossAt((gazeCoords[0,0], gazeCoords[0,1]))
+                        print(gazeCoords[0,0], gazeCoords[0,1])
+                        coords.append({
+                        'fixation_number': fixations, 'x': gazeCoords[0,0],'y': gazeCoords[0,1] #las fijaciones son los puntos que detecta la aplicacion que un usuario mira
+                    })
+                        fixations += 1
+                readSuccessful, frame = vc.read()
+        
+            # print ("writing")
+            crosshair.write() #writes data to a csv for MATLAB
+            crosshair.close()
+            # print ("HT:\n")
+            # print (HT)
+            resultXYpxpy = np.array(crosshair.result)
+            # print ("eyeData:\n")
+            # print (getFeatures(resultXYpxpy[:,:-2]))
+            # print ("coordenadas: \n")
+
+            # with open('1700wxoffsetyoffsetxy.csv') as tracker:
+            #     fixation = csv.reader(tracker, delimiter=',', quotechar=',', quoting=csv.QUOTE_MINIMAL)
+            #     for index_fixation, row in enumerate(fixation):
+            #         item = {
+            #             'fixation_number': index_fixation, 'x': row[2],'y': row[3],
+            #         }
+            #         coords.append(item)
+        finally:
+            vc.release() #close the camera
+            self.make_model(coords)
+
+    def make_model(self, coords):
+        """
+        El modelo es la unión de las zonas que se etiquetaron y las fijaciones
+
+        """
+
+        segmentation = aois
+        functions = {}
+        relations = []
+        print(coords)
+        print(segmentation)
+        for index_fixation, row in enumerate(coords): #se verificar cuáles fijaciones se encuentran dentro de las zonas que se definieron y si es así se agregan al modelo
+            relations.append((index_fixation, index_fixation + 1))
+            for index_segment, segment in enumerate(segmentation):
+                if (float(row['x']) >= float(segment['x0']) and float(row['x']) <= float(segment['x1'])):
+                    if (float(row['y']) >= float(segment['y0']) and float(row['y']) <= float(segment['y1'])):
+                        # print ('fixation index', index_fixation, 'segment index', index_segment, 'match')
+                        functions.update({index_fixation: [segment['aoi']]})
+                        break
+                    else:
+                        functions.update({index_fixation: ['undefined']})
+                else:
+                    functions.update({index_fixation: ['undefined']})
+        relations.append((len(relations), len(relations)))
+
+        def getResult(relations,functions):
+            """
+            Una vez que se tiene el modelo, se le pide al usuario la fórmula que es la que se va a ocupar para verificar si se cumple o no
+
+            """
+
+            phi = theformula.get()
+            K = Kripke(R=relations, L=functions)
+            print(K)
+            print(modelcheck(K, phi))
+
+            result = modelcheck(K, phi)
+            # w_result = tk.Tk()
+            #
+            # w_result.title("Result")
+            # label_one = tk.Label(w_result, text="Formula")
+            # label_one.grid(row=0, column=0)
+            # label_two = tk.Label(w_result, text=phi)
+            # label_two.grid(row=0, column=1)
+
+            label_three = tk.Label(formula, text="Result")
+            label_three.grid(row=1, column=0)
+            label_three = tk.Label(formula, text=result)
+            label_three.grid(row=1, column=1)
+
+        img = cv2.imread('lenguajes.jpg')
+        for index_fixation, row in enumerate(coords):
+            print(int(row['x']), int(row['y']))
+            # cv2.circle(img, (int(row['x']), int(row['y'])), 15, (0, 0, 255), -1)
+
+            font = cv2.FONT_HERSHEY_SIMPLEX
+            bottomLeftCornerOfText = (int(row['x']), int(row['y']))
+            fontScale = 1
+            fontColor = (0, 0, 255)
+            lineType = 2
+
+            cv2.putText(img, str(index_fixation),
+                        bottomLeftCornerOfText,
+                        font,
+                        fontScale,
+                        fontColor,
+                        lineType)
+            # img[int(row['y']), int(row['x'])] = [0, 0, 255]
+
+        cv2.imshow('image', img)
+        cv2.imwrite("scanpath.png", img) #save the last-displayed image to file, for our report
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
+
+        # formula = tk.Tk()
+        #
+        # formula.title("Formula")
+        # labelone = tk.Label(formula, text="Formula")
+        # labelone.grid(row=0, column=0)
+        # name = tk.StringVar()
+        #
+        # theformula = tk.Entry(formula, textvariable=name)
+        # theformula.grid(row=0, column=1)
+        # btn = tk.Button(formula, text="Model check", command= lambda: getResult(relations,functions))
+        # btn.grid(row=0, column=3)
+
