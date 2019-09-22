@@ -13,8 +13,8 @@ from . import ClassyVirtualReferencePoint as ClassyVirtualReferencePoint
 
 class CheckCamera(object):
 
-    HAARFACECASCADE = cv2.CascadeClassifier("../haarcascades/haarcascade_frontalface_alt.xml")
-    HAAREYECASCADE = cv2.CascadeClassifier("../haarcascades/haarcascade_eye.xml")
+    HAARFACECASCADE = cv2.CascadeClassifier("haarcascades/haarcascade_frontalface_alt.xml")
+    HAAREYECASCADE = cv2.CascadeClassifier("haarcascades/haarcascade_eye.xml")
     WINDOW_NAME = "Verificar camara."
     VERBOSE = True
     BLOWUP_FACTOR = 1 # Resizes image before doing the algorithm. Changing to 2 makes things really slow. So nevermind on this.
