@@ -7,9 +7,37 @@ import cv2
 from pyModelChecking import *
 from pyModelChecking.LTL import *
 import numpy as np
+from . import ransac
 from . import ClassyVirtualReferencePoint as ClassyVirtualReferencePoint
+from decimal import Decimal
 #gazepattern
-# - - -
+from eyedetector.models import XYPupilFrame
+
+
+class LinearLeastSquaresModel:
+    """linear system solved using linear least squares
+
+    This class fulfills the model interface needed by the ransac() function.
+
+    """
+    # lists of indices of input and output columns
+    def __init__(self,input_columns,output_columns,debug=False):
+        self.input_columns = input_columns
+        self.output_columns = output_columns
+        self.debug = debug
+    def fit(self, data):
+##        A = numpy.vstack([data[:,i] for i in self.input_columns]).T
+##        B = numpy.vstack([data[:,i] for i in self.output_columns]).T
+##        x,resids,rank,s = scipy.linalg.lstsq(A,B)
+##        return x
+        HT = np.linalg.lstsq(data[:,self.input_columns], data[:,self.output_columns])[0] # returns a tuple, where index 0 is the solution matrix.
+        return HT
+
+    def get_error( self, data, model):
+        B_fit = data[:,self.input_columns].dot(model)
+        err_per_point = np.sum((data[:,self.output_columns]-B_fit)**2,axis=1) # sum squared error per row
+        err_per_point = np.sqrt(err_per_point) # I'll see if this helps. If not remove for speed.
+        return err_per_point
 
 class CheckCamera(object):
 
@@ -397,12 +425,14 @@ class CheckCamera(object):
         self.detector = cv2.xfeatures2d.SURF_create(hessianThreshold, nOctaves, nOctaveLayers, extended, upright)
 
 
-class Trainning(object):
+class Training(CheckCamera):
 
+    RANSAC_MIN_INLIERS = 7
     readSuccessful = False
 
     def __init__(self, *args, **kwargs):
         from . import pygamestuff
+        self.make_detector()
         crosshair = pygamestuff.Crosshair([7, 2], quadratic = False)
         vc = cv2.VideoCapture(0) # Initialize the default camera
         if vc.isOpened(): # try to get the first frame
@@ -412,37 +442,46 @@ class Trainning(object):
         MAX_SAMPLES_TO_RECORD = 999999
         recordedEvents=0 #numero de fijaciones
         HT = None
+        XYPupilFrame.objects.all().delete()
         try:
             coords = []
             points = 0
             clicks = 0
             while self.readSuccessful and recordedEvents < MAX_SAMPLES_TO_RECORD and not crosshair.userWantsToQuit:
                 points += 1
-                pupilOffsetXYList = getOffset(frame, allowDebugDisplay=False)
+                pupilOffsetXYList = self.get_offset(frame, allowDebugDisplay=False)
                 if pupilOffsetXYList is not None: #si se obtienen los dos ojos, espera un click
-                    if crosshair.pollForClick(): #si hace click se agregan los puntos a la calibracion
+                    if crossahir.pollForClick(): #si hace click se agregan los puntos a la calibracion
                         clicks += 1
-                        print('clicks '+ str(clicks))
+                        #print('clicks '+ str(clicks))
                         crosshair.clearEvents()
                         #print( (xOffset,yOffset) )
                         #do learning here, to relate xOffset and yOffset to screenX,screenY
                         crosshair.record(pupilOffsetXYList)
+                        print("####### LISTA DE ENTRENAMIENTO #######")
+                        print(pupilOffsetXYList)
+                        print("######################################")
+                        xyframemodel = XYPupilFrame()
+                        xyframemodel.x = pupilOffsetXYList[0]
+                        xyframemodel.y = pupilOffsetXYList[1]
+                        xyframemodel.save()
+
                         print ("recorded something")
                         crosshair.remove()
                         recordedEvents += 1
-                        if recordedEvents > RANSAC_MIN_INLIERS:
+                        if recordedEvents > self.RANSAC_MIN_INLIERS:
                             ##HT = fitTransformation(np.array(crosshair.result))
                             resultXYpxpy =np.array(crosshair.result)
-                            features = getFeatures(resultXYpxpy[:,:-2])
+                            features =self.get_features(resultXYpxpy[:,:-2])
                             featuresAndLabels = np.concatenate( (features, resultXYpxpy[:,-2:] ) , axis=1)
-                            HT = RANSACFitTransformation(featuresAndLabels)
+                            HT = self.RANSACFitTransformation(featuresAndLabels)
                             print (HT)
                     if HT is not None: # dibujar el circulo estimando la mirada
                         #print('ya empieza la estimacion')
                         #print(messagebox.askyesnocancel(message="Comenzará la calibración", title="Título"))
 
                         fixations = 0
-                        currentFeatures = getFeatures( np.array( (pupilOffsetXYList[0], pupilOffsetXYList[1]) ))
+                        currentFeatures = self.get_features( np.array( (pupilOffsetXYList[0], pupilOffsetXYList[1]) ))
                         gazeCoords = currentFeatures.dot(HT)
                         crosshair.drawCrossAt((gazeCoords[0,0], gazeCoords[0,1]))
                         print(gazeCoords[0,0], gazeCoords[0,1])
@@ -452,26 +491,66 @@ class Trainning(object):
                         fixations += 1
                 self.readSuccessful, frame = vc.read()
         
-            # print ("writing")
+        
             crosshair.write() #writes data to a csv for MATLAB
             crosshair.close()
-            # print ("HT:\n")
-            # print (HT)
             resultXYpxpy = np.array(crosshair.result)
-            # print ("eyeData:\n")
-            # print (getFeatures(resultXYpxpy[:,:-2]))
-            # print ("coordenadas: \n")
-
-            # with open('1700wxoffsetyoffsetxy.csv') as tracker:
-            #     fixation = csv.reader(tracker, delimiter=',', quotechar=',', quoting=csv.QUOTE_MINIMAL)
-            #     for index_fixation, row in enumerate(fixation):
-            #         item = {
-            #             'fixation_number': index_fixation, 'x': row[2],'y': row[3],
-            #         }
-            #         coords.append(item)
         finally:
             vc.release() #close the camera
-            self.make_model(coords)
+            #self.make_model(coords)
+
+    '''
+    def main_for_training():
+        import pygamestuff
+        crosshair = pygamestuff.Crosshair([7, 2], quadratic = False)
+        vc = cv2.VideoCapture(0) # Initialize the default camera
+        if vc.isOpened(): # try to get the first frame
+            (self.readSuccessful, frame) = vc.read()
+        else:
+            raise(Exception("failed to open camera."))
+            return
+
+        MAX_SAMPLES_TO_RECORD = 999999
+        recordedEvents=0
+        HT = None
+        try:
+            while self.readSuccessful and recordedEvents < MAX_SAMPLES_TO_RECORD and not crosshair.userWantsToQuit:
+                pupilOffsetXYList = getOffset(frame, allowDebugDisplay=False)
+                if pupilOffsetXYList is not None: #If we got eyes, check for a click. Else, wait until we do.
+                    if crosshair.pollForClick():
+                        crosshair.clearEvents()
+                        #print( (xOffset,yOffset) )
+                        #do learning here, to relate xOffset and yOffset to screenX,screenY
+                        crosshair.record(pupilOffsetXYList)
+                        print "recorded something"
+                        crosshair.remove()
+                        recordedEvents += 1
+                        if recordedEvents > RANSAC_MIN_INLIERS:
+        ##                    HT = fitTransformation(np.array(crosshair.result))
+                            resultXYpxpy =np.array(crosshair.result)
+                            features = getFeatures(resultXYpxpy[:,:-2])
+                            featuresAndLabels = np.concatenate( (features, resultXYpxpy[:,-2:] ) , axis=1)
+                            HT = RANSACFitTransformation(featuresAndLabels)
+                            print HT
+                    if HT is not None: # draw predicted eye position
+                        currentFeatures =getFeatures( np.array( (pupilOffsetXYList[0], pupilOffsetXYList[1]) ))
+                        gazeCoords = currentFeatures.dot(HT)
+                        crosshair.drawCrossAt( (gazeCoords[0,0], gazeCoords[0,1]) )
+                self.readSuccessful, frame = vc.read()
+        
+            print "writing"
+            crosshair.write() #writes data to a csv for MATLAB
+            crosshair.close()
+            print "HT:\n"
+            print HT
+            resultXYpxpy =np.array(crosshair.result)
+            print "eyeData:\n"
+            print getFeatures(resultXYpxpy[:,:-2])
+            print "resultXYpxpy:\n"
+            print resultXYpxpy[:,-2:]
+        finally:
+            vc.release() #close the camera
+    '''
 
     def make_model(self, coords):
         """
@@ -559,3 +638,106 @@ class Trainning(object):
         # btn = tk.Button(formula, text="Model check", command= lambda: getResult(relations,functions))
         # btn.grid(row=0, column=3)
 
+    def get_features(self, XYOffsets, quadratic = True):
+        """
+
+        esta funcion se encarga de renderar y de hacer tal cosa,
+
+        """
+    ##    print XYOffsets
+        if len(XYOffsets.shape)==1:
+            numRows=1
+            XYOffsets.shape = (numRows,XYOffsets.shape[0])
+        else:
+            numRows =XYOffsets.shape[0]
+        numCols = XYOffsets.shape[1]
+
+        data = np.concatenate( (XYOffsets, np.ones( (XYOffsets.shape[0],1)) ) , axis=1) # [x,y,1]
+        if quadratic:
+            squaredFeatures = np.square(XYOffsets)
+            squaredFeatures.shape = (numRows,numCols)
+            xy = XYOffsets[:,0]*XYOffsets[:,1]
+            xy.shape = (numRows,1)
+    ##        print(xy.shape)
+
+            data = np.concatenate( (data,squaredFeatures, xy ) , axis=1) # [x,y,1,x^2,y^2,xy]
+        return data
+
+    def RANSACFitTransformation(self, OffsetsAndPixels):
+        numInputCols = OffsetsAndPixels.shape[1]-2
+        data = np.concatenate( (OffsetsAndPixels[:,0:numInputCols], OffsetsAndPixels[:,numInputCols:] ) , axis=1)
+
+        model = LinearLeastSquaresModel(range(numInputCols), (numInputCols,numInputCols+1))
+        minSeedSize = 5
+        iterations = 800
+        maxInlierError = 240 #**2
+        HT = ransac.ransac(data, model, minSeedSize, iterations, maxInlierError, self.RANSAC_MIN_INLIERS)
+        return HT
+
+
+class TestExperiment(Training):
+    def __init__(self, *args, **kwargs):
+        from . import pygamestuff
+        self.make_detector()
+        crosshair = pygamestuff.Crosshair([7, 2], quadratic = False)
+        vc = cv2.VideoCapture(0) # Initialize the default camera
+        if vc.isOpened(): # try to get the first frame
+            (self.readSuccessful, frame) = vc.read()
+        else:
+            raise(Exception("failed to open camera."))
+        MAX_SAMPLES_TO_RECORD = 999999
+        recordedEvents=0 #numero de fijaciones
+        HT = None
+        XYPupilFrame.objects.all().delete()
+        try:
+            coords = []
+            points = 0
+            clicks = 0
+            while self.readSuccessful and not crosshair.userWantsToQuit:
+                points += 1
+
+                    pupilOffsetXYList = self.get_offset(frame, allowDebugDisplay=False)
+                pupilxyobjects = XYPupilFrame.objects.all()
+                pupilxylist = [[object.x, object.y] for object in pupilxyobjects]
+                for pupilOffsetXYListObject in pupilxylist:
+                    crosshair.record(pupilOffsetXYListObject)
+                if pupilOffsetXYList is not None: #si se obtienen los dos ojos, espera un click
+                    #if crossahir.pollForClick(): #si hace click se agregan los puntos a la calibracion
+                    #    clicks += 1
+                        #print('clicks '+ str(clicks))
+                    crosshair.clearEvents()
+                    #print( (xOffset,yOffset) )
+                    #do learning here, to relate xOffset and yOffset to screenX,screenY
+
+                    print ("recorded something")
+                    crosshair.remove()
+                    recordedEvents += 1
+                    if recordedEvents > self.RANSAC_MIN_INLIERS:
+                        ##HT = fitTransformation(np.array(crosshair.result))
+                        resultXYpxpy =np.array(crosshair.result)
+                        features =self.get_features(resultXYpxpy[:,:-2])
+                        featuresAndLabels = np.concatenate( (features, resultXYpxpy[:,-2:] ) , axis=1)
+                        HT = self.RANSACFitTransformation(featuresAndLabels)
+                        print (HT)
+                    if HT is not None: # dibujar el circulo estimando la mirada
+                        #print('ya empieza la estimacion')
+                        #print(messagebox.askyesnocancel(message="Comenzará la calibración", title="Título"))
+
+                        fixations = 0
+                        currentFeatures = self.get_features( np.array( (pupilOffsetXYList[0], pupilOffsetXYList[1]) ))
+                        gazeCoords = currentFeatures.dot(HT)
+                        crosshair.drawCrossAt((gazeCoords[0,0], gazeCoords[0,1]))
+                        print(gazeCoords[0,0], gazeCoords[0,1])
+                        coords.append({
+                        'fixation_number': fixations, 'x': gazeCoords[0,0],'y': gazeCoords[0,1] #las fijaciones son los puntos que detecta la aplicacion que un usuario mira
+                    })
+                        fixations += 1
+                self.readSuccessful, frame = vc.read()
+        
+        
+            crosshair.write() #writes data to a csv for MATLAB
+            crosshair.close()
+            resultXYpxpy = np.array(crosshair.result)
+        finally:
+            vc.release() #close the camera
+            #self.make_model(coords)

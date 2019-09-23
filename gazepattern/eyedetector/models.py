@@ -17,3 +17,7 @@ class ImageRectangle(models.Model):
 	y0 = models.DecimalField(max_digits=9, decimal_places=4)
 	y1 = models.DecimalField(max_digits=9, decimal_places=4)
 	name = models.CharField(max_length=50)
+
+class XYPupilFrame(models.Model):
+	x = models.DecimalField(max_digits=50, decimal_places=30)
+	y = models.DecimalField(max_digits=50, decimal_places=30) 
