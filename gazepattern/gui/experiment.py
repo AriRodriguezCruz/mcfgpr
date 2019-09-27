@@ -451,7 +451,7 @@ class Training(CheckCamera):
                 points += 1
                 pupilOffsetXYList = self.get_offset(frame, allowDebugDisplay=False)
                 if pupilOffsetXYList is not None: #si se obtienen los dos ojos, espera un click
-                    if crossahir.pollForClick(): #si hace click se agregan los puntos a la calibracion
+                    if crosshair.pollForClick(): #si hace click se agregan los puntos a la calibracion
                         clicks += 1
                         #print('clicks '+ str(clicks))
                         crosshair.clearEvents()
@@ -696,7 +696,7 @@ class TestExperiment(Training):
             while self.readSuccessful and not crosshair.userWantsToQuit:
                 points += 1
 
-                    pupilOffsetXYList = self.get_offset(frame, allowDebugDisplay=False)
+                pupilOffsetXYList = self.get_offset(frame, allowDebugDisplay=False)
                 pupilxyobjects = XYPupilFrame.objects.all()
                 pupilxylist = [[object.x, object.y] for object in pupilxyobjects]
                 for pupilOffsetXYListObject in pupilxylist:

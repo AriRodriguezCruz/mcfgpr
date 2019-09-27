@@ -13,5 +13,6 @@ urlpatterns = [
 	path('clasificar/<int:image_id>/', views.ImageClasificarView.as_view(), name="clasificar"),
 	path('experiment/', views.ExperimentView.as_view(), name="experiment"),
 	path('checkcamera/', views.CheckCameraView.as_view(), name="check_camera"),
-	path('train/', views.TrainView.as_view(), name="train")
+	path('train/', views.TrainView.as_view(), name="train"),
+	path('test/', views.TestView.as_view(), name="test")
 ]
