@@ -693,14 +693,15 @@ class TestExperiment(Training):
             coords = []
             points = 0
             clicks = 0
+            pupilxyobjects = XYPupilFrame.objects.all()
+            pupilxylist = [[object.x, object.y] for object in pupilxyobjects]
+            for pupilOffsetXYListObject in pupilxylist:
+                crosshair.record(pupilOffsetXYListObject)
             while self.readSuccessful and not crosshair.userWantsToQuit:
                 points += 1
 
                 pupilOffsetXYList = self.get_offset(frame, allowDebugDisplay=False)
-                pupilxyobjects = XYPupilFrame.objects.all()
-                pupilxylist = [[object.x, object.y] for object in pupilxyobjects]
-                for pupilOffsetXYListObject in pupilxylist:
-                    crosshair.record(pupilOffsetXYListObject)
+
                 if pupilOffsetXYList is not None: #si se obtienen los dos ojos, espera un click
                     #if crossahir.pollForClick(): #si hace click se agregan los puntos a la calibracion
                     #    clicks += 1
@@ -708,14 +709,14 @@ class TestExperiment(Training):
                     crosshair.clearEvents()
                     #print( (xOffset,yOffset) )
                     #do learning here, to relate xOffset and yOffset to screenX,screenY
-
+                    crosshair.record(pupilOffsetXYList)
                     print ("recorded something")
                     crosshair.remove()
                     recordedEvents += 1
                     if recordedEvents > self.RANSAC_MIN_INLIERS:
                         ##HT = fitTransformation(np.array(crosshair.result))
                         resultXYpxpy =np.array(crosshair.result)
-                        features =self.get_features(resultXYpxpy[:,:-2])
+                        features = self.get_features(resultXYpxpy[:,:-2])
                         featuresAndLabels = np.concatenate( (features, resultXYpxpy[:,-2:] ) , axis=1)
                         HT = self.RANSACFitTransformation(featuresAndLabels)
                         print (HT)
