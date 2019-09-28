@@ -458,9 +458,8 @@ class Training(CheckCamera):
                         #print( (xOffset,yOffset) )
                         #do learning here, to relate xOffset and yOffset to screenX,screenY
                         crosshair.record(pupilOffsetXYList)
-                        print("####### LISTA DE ENTRENAMIENTO #######")
                         print(pupilOffsetXYList)
-                        print("######################################")
+
                         xyframemodel = XYPupilFrame()
                         xyframemodel.x = pupilOffsetXYList[0]
                         xyframemodel.y = pupilOffsetXYList[1]
@@ -675,7 +674,12 @@ class Training(CheckCamera):
         return HT
 
 
-class TestExperiment(Training):
+class Experiment(Training):
+
+    def __init__(self, *args, **kwargs):
+            RANSAC_MIN_INLIERS = 7
+    readSuccessful = False
+
     def __init__(self, *args, **kwargs):
         from . import pygamestuff
         self.make_detector()
@@ -693,33 +697,34 @@ class TestExperiment(Training):
             coords = []
             points = 0
             clicks = 0
-            pupilxyobjects = XYPupilFrame.objects.all()
-            pupilxylist = [[object.x, object.y] for object in pupilxyobjects]
-            for pupilOffsetXYListObject in pupilxylist:
-                crosshair.record(pupilOffsetXYListObject)
-            while self.readSuccessful and not crosshair.userWantsToQuit:
+            while self.readSuccessful and recordedEvents < MAX_SAMPLES_TO_RECORD and not crosshair.userWantsToQuit:
                 points += 1
-
                 pupilOffsetXYList = self.get_offset(frame, allowDebugDisplay=False)
-
                 if pupilOffsetXYList is not None: #si se obtienen los dos ojos, espera un click
-                    #if crossahir.pollForClick(): #si hace click se agregan los puntos a la calibracion
-                    #    clicks += 1
+                    if crosshair.pollForClick(): #si hace click se agregan los puntos a la calibracion
+                        clicks += 1
                         #print('clicks '+ str(clicks))
-                    crosshair.clearEvents()
-                    #print( (xOffset,yOffset) )
-                    #do learning here, to relate xOffset and yOffset to screenX,screenY
-                    crosshair.record(pupilOffsetXYList)
-                    print ("recorded something")
-                    crosshair.remove()
-                    recordedEvents += 1
-                    if recordedEvents > self.RANSAC_MIN_INLIERS:
-                        ##HT = fitTransformation(np.array(crosshair.result))
-                        resultXYpxpy =np.array(crosshair.result)
-                        features = self.get_features(resultXYpxpy[:,:-2])
-                        featuresAndLabels = np.concatenate( (features, resultXYpxpy[:,-2:] ) , axis=1)
-                        HT = self.RANSACFitTransformation(featuresAndLabels)
-                        print (HT)
+                        crosshair.clearEvents()
+                        #print( (xOffset,yOffset) )
+                        #do learning here, to relate xOffset and yOffset to screenX,screenY
+                        crosshair.record(pupilOffsetXYList)
+                        print(pupilOffsetXYList)
+
+                        xyframemodel = XYPupilFrame()
+                        xyframemodel.x = pupilOffsetXYList[0]
+                        xyframemodel.y = pupilOffsetXYList[1]
+                        xyframemodel.save()
+
+                        print ("recorded something")
+                        crosshair.remove()
+                        recordedEvents += 1
+                        if recordedEvents > self.RANSAC_MIN_INLIERS:
+                            ##HT = fitTransformation(np.array(crosshair.result))
+                            resultXYpxpy =np.array(crosshair.result)
+                            features =self.get_features(resultXYpxpy[:,:-2])
+                            featuresAndLabels = np.concatenate( (features, resultXYpxpy[:,-2:] ) , axis=1)
+                            HT = self.RANSACFitTransformation(featuresAndLabels)
+                            print (HT)
                     if HT is not None: # dibujar el circulo estimando la mirada
                         #print('ya empieza la estimacion')
                         #print(messagebox.askyesnocancel(message="Comenzará la calibración", title="Título"))
@@ -742,3 +747,4 @@ class TestExperiment(Training):
         finally:
             vc.release() #close the camera
             #self.make_model(coords)
+ 

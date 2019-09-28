@@ -18,6 +18,13 @@ class ImageRectangle(models.Model):
 	y1 = models.DecimalField(max_digits=9, decimal_places=4)
 	name = models.CharField(max_length=50)
 
+
 class XYPupilFrame(models.Model):
 	x = models.DecimalField(max_digits=50, decimal_places=30)
 	y = models.DecimalField(max_digits=50, decimal_places=30) 
+
+
+class Experiment(models.Model):
+	name = models.CharField(max_length=50)
+	description = models.CharField(max_length=350, blank=True, null=True)
+	image = models.ForeignKey(Image, related_name='experiments', on_delete=models.CASCADE)

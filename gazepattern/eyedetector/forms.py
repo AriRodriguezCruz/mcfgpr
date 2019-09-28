@@ -20,3 +20,8 @@ class ImageForm(forms.Form):
 		image.save()
 		print(image)
 		return image
+
+
+class MakeExperimentForm(forms.Form):
+	name = forms.CharField(required=True, max_length=30, widget=TextWidget(label="Nombre"))
+	description = forms.CharField(required=True, max_length=320, widget=TextWidget(label="Descripcion"))

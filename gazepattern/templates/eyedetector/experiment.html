@@ -10,10 +10,7 @@
 			Verificar camara.
 		</a>
 		<a href="{% url 'train' %}" class="action">
-			Entrenar al modelo.
-		</a>
-		<a href="{% url 'test' %}" class="action">
-			Probar seguimiento ocular.
+			Prueba de seguimiento ocular.
 		</a>
 		<div class="image-list">
 			{% for image in images %}
@@ -27,10 +24,21 @@
 						</div>
 						<div class="image-list-description">
 							{{ image.description }}
+							<div class="experiment-list">
+								<div class="experiment-item">
+									expeirmento 1
+								</div>
+								<div class="experiment-item">
+									experimento 2
+								</div>
+							</div>
 						</div>
 					</div>
 					<div class="image-list-content">
-						<a href="{{ image.image.url }}" target="_blank" class="button-form">Agregar un experimento</a>
+						{% for field in form %}
+							{{ field }}
+						{% endfor %}
+						<button href="{{ image.image.url }}" target="_blank" class="button-form">Agregar un experimento</button>
 					</div>
 				</div>
 			{% endfor %}

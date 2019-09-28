@@ -5,10 +5,10 @@ from django.shortcuts import render
 # - - -
 #gazepattern
 from utils.views import BaseView
-from eyedetector.forms import ImageForm
+from eyedetector.forms import ImageForm, MakeExperimentForm
 from eyedetector.models import Image
 from gui.application import Application
-from gui.experiment import CheckCamera, Training, TestExperiment
+from gui.experiment import CheckCamera, Training
 
 class App(object):
 	"""docstring for App"""
@@ -62,10 +62,12 @@ class ImageClasificarView(BaseView):
 class ExperimentView(BaseView):
 
 	template = "eyedetector/experiment.html"
+	form_class = MakeExperimentForm
 
 	def get_context(self, request):
 		context = {
-			"images": Image.objects.all()
+			"images": Image.objects.all(),
+			'form': self.form_class
 		}
 		return context
 
@@ -85,9 +87,10 @@ class TrainView(BaseView):
 		Training()
 		return render(request, self.template, locals())
 
-class TestView(BaseView):
+
+class MakeExperimentView(BaseView):
+
 	template = "generic_template.html"
-	
+
 	def get(self, request, *args):
-		TestExperiment()
-		return render(request, self.template, locals())
+		return render(request, self,template, locals())
