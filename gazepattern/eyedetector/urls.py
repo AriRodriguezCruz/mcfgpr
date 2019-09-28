@@ -14,5 +14,5 @@ urlpatterns = [
 	path('experiment/', views.ExperimentView.as_view(), name="experiment"),
 	path('checkcamera/', views.CheckCameraView.as_view(), name="check_camera"),
 	path('train/', views.TrainView.as_view(), name="train"),
-	path('makeexperiment', views.MakeExperimentView.as_view(), name="make_experiment"),
+	path('makeexperiment/<int:image_id>', views.MakeExperimentView.as_view(), name="make_experiment"),
 ]

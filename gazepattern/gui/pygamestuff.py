@@ -120,26 +120,3 @@ class Crosshair(object):
         pygame.display.quit()
 
 
-##ch = Crosshair()
-##for i in range(10):
-##    pygame.time.delay(100)
-##    ch.getClick()
-
-
-#while 1:
-#    pressed = pygame.mouse.get_pressed()
-#    if any(pressed):
-#        break
-#    for event in pygame.event.get():
-#        if event.type in (QUIT, pygame.KEYDOWN):
-#            break
-
-#    crosshair.draw()
-#    pygame.time.delay(10)#miliseconds
-#    xoffset = 0
-#    yoffset = 0
-#    crosshair.record(xoffset, yoffset)
-#    crosshair.move()
-
-
-

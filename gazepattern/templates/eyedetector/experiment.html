@@ -34,12 +34,13 @@
 							</div>
 						</div>
 					</div>
-					<div class="image-list-content">
+					<form  action="{% url 'make_experiment' image.pk %}" method="POST" class="image-list-content">
+						{% csrf_token %}
 						{% for field in form %}
 							{{ field }}
 						{% endfor %}
 						<button href="{{ image.image.url }}" target="_blank" class="button-form">Agregar un experimento</button>
-					</div>
+					</form>
 				</div>
 			{% endfor %}
 		</div>

@@ -135,3 +135,38 @@ class Application(object):
         btn = tk.Button(window, text ="Finish AOI definition", command = save_json)
         btn.grid(row = 1, column = 1)
 
+
+class ShowImage(object):
+
+    def __init__(self, image_path, patern): 
+        root = tk.Tk()
+        root.geometry( "1000x720" )
+        root.attributes("-fullscreen", True)
+        self.parent = root
+        self.path = image_path
+
+        self.canvas = tk.Canvas(self.parent, width = 1366, height = 768,
+                                bg = "white" )
+        self.canvas.grid(row=0, column=0, sticky='nsew')
+        #path=filedialog.askopenfilename(filetypes=[("Image File",'.jpg')])
+        self.im = PIL.Image.open(self.path)
+        self.wazil,self.lard=self.im.size
+        self.canvas.config(scrollregion=(0,0,self.wazil,self.lard))
+        self.tk_im = ImageTk.PhotoImage(self.im)
+        self.canvas.create_image(0,0,anchor="nw",image=self.tk_im)
+
+        # make the top right close button minimize (iconify) the main window
+        root.protocol("WM_DELETE_WINDOW", root.iconify)
+
+        # make Esc exit the program
+        root.bind('<Escape>', lambda e: root.destroy())
+
+        # create a menu bar with an Exit command
+        menubar = tk.Menu(root)
+        filemenu = tk.Menu(menubar, tearoff=0)
+        filemenu.add_command(label="Exit", command=root.destroy)
+        menubar.add_cascade(label="File", menu=filemenu)
+        root.config(menu=menubar)
+
+        root.mainloop()
+        patern.app_has_destroy = True

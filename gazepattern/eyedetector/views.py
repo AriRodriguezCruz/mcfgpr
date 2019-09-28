@@ -1,14 +1,15 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
+from django.db import transaction
 #python 
 # - - -
 #gazepattern
 from utils.views import BaseView
 from eyedetector.forms import ImageForm, MakeExperimentForm
-from eyedetector.models import Image
+from eyedetector.models import Image, Experiment
 from gui.application import Application
-from gui.experiment import CheckCamera, Training
+from gui.experiment import CheckCamera, Training, MakeExperiment
 
 class App(object):
 	"""docstring for App"""
@@ -92,5 +93,15 @@ class MakeExperimentView(BaseView):
 
 	template = "generic_template.html"
 
-	def get(self, request, *args):
-		return render(request, self,template, locals())
+	@transaction.atomic
+	def post(self, request, image_id):
+		form = MakeExperimentForm(request.POST)
+		if form.is_valid():
+			image = get_object_or_404(Image, pk=image_id)
+			experiment = Experiment()
+			experiment.name = request.POST.get('name')
+			experiment.description = request.POST.get('description')
+			experiment.image = image
+			experiment.save()
+			MakeExperiment(image.image.file.name)
+		return render(request, self.template, {})					

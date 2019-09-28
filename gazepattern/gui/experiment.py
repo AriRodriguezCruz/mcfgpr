@@ -10,8 +10,10 @@ import numpy as np
 from . import ransac
 from . import ClassyVirtualReferencePoint as ClassyVirtualReferencePoint
 from decimal import Decimal
+import threading
 #gazepattern
 from eyedetector.models import XYPupilFrame
+from .application import ShowImage
 
 
 class LinearLeastSquaresModel:
@@ -674,15 +676,16 @@ class Training(CheckCamera):
         return HT
 
 
-class Experiment(Training):
+class MakeExperiment(Training):
 
-    def __init__(self, *args, **kwargs):
-            RANSAC_MIN_INLIERS = 7
+    start_tk = False
     readSuccessful = False
+    app_has_destroy = False
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, image_root, **kwargs):
         from . import pygamestuff
         self.make_detector()
+        self.image_root = image_root
         crosshair = pygamestuff.Crosshair([7, 2], quadratic = False)
         vc = cv2.VideoCapture(0) # Initialize the default camera
         if vc.isOpened(): # try to get the first frame
@@ -697,7 +700,7 @@ class Experiment(Training):
             coords = []
             points = 0
             clicks = 0
-            while self.readSuccessful and recordedEvents < MAX_SAMPLES_TO_RECORD and not crosshair.userWantsToQuit:
+            while (self.readSuccessful and recordedEvents < MAX_SAMPLES_TO_RECORD and not crosshair.userWantsToQuit) and not self.app_has_destroy:
                 points += 1
                 pupilOffsetXYList = self.get_offset(frame, allowDebugDisplay=False)
                 if pupilOffsetXYList is not None: #si se obtienen los dos ojos, espera un click
@@ -720,6 +723,7 @@ class Experiment(Training):
                         recordedEvents += 1
                         if recordedEvents > self.RANSAC_MIN_INLIERS:
                             ##HT = fitTransformation(np.array(crosshair.result))
+                            
                             resultXYpxpy =np.array(crosshair.result)
                             features =self.get_features(resultXYpxpy[:,:-2])
                             featuresAndLabels = np.concatenate( (features, resultXYpxpy[:,-2:] ) , axis=1)
@@ -728,23 +732,31 @@ class Experiment(Training):
                     if HT is not None: # dibujar el circulo estimando la mirada
                         #print('ya empieza la estimacion')
                         #print(messagebox.askyesnocancel(message="Comenzará la calibración", title="Título"))
-
+                        show_image_thread = threading.Thread(target=self.show_image)
+                        if not self.start_tk:
+                            show_image_thread.start()
+                            self.start_tk = True
                         fixations = 0
                         currentFeatures = self.get_features( np.array( (pupilOffsetXYList[0], pupilOffsetXYList[1]) ))
                         gazeCoords = currentFeatures.dot(HT)
                         crosshair.drawCrossAt((gazeCoords[0,0], gazeCoords[0,1]))
                         print(gazeCoords[0,0], gazeCoords[0,1])
                         coords.append({
-                        'fixation_number': fixations, 'x': gazeCoords[0,0],'y': gazeCoords[0,1] #las fijaciones son los puntos que detecta la aplicacion que un usuario mira
-                    })
+                            'fixation_number': fixations, 
+                            'x': gazeCoords[0,0],
+                            'y': gazeCoords[0,1] #las fijaciones son los puntos que detecta la aplicacion que un usuario mira
+                        })
                         fixations += 1
-                self.readSuccessful, frame = vc.read()
-        
+                print(self.app_has_destroy)
+                self.readSuccessful, frame = vc.read()        
         
             crosshair.write() #writes data to a csv for MATLAB
             crosshair.close()
             resultXYpxpy = np.array(crosshair.result)
         finally:
             vc.release() #close the camera
+            #show_image_thread.join()
             #self.make_model(coords)
  
+    def show_image(self):
+        ShowImage(self.image_root, self)
