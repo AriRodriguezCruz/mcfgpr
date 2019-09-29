@@ -27,16 +27,22 @@
 						<div class="image-list-description">
 							{{ image.description }}
 							<div class="experiment-list">
-								Experimentos:
-								{% for experiment in image.experiments.all %}
-								<div class="experiment-item">
-									<div class="experiment-subitem">
-										<b>Nombre: {{ experiment.name }}</b>
-									</div>
-									<div class="experiment-subitem">
-										<b>Descripcion: {{ experiment.description | default_if_none:"Sin descripcion" }}</b>
-									</div>
+								<div class="experiment-list-title">
+									Experimentos:
 								</div>
+								{% for experiment in image.experiments.all %}
+									<div class="experiment-item">
+										<div class="experiment-subitem">
+											<b>Nombre: {{ experiment.name }}</b>
+										</div>
+										<div class="experiment-subitem">
+											<b>Descripcion: {{ experiment.description | default_if_none:"Sin descripcion" }}</b>
+										</div>
+									</div>
+								{% empty %}
+									<div class="experiment-subitem">
+										No hay experimentos asociaods a esta imagen.
+									</div>
 								{% endfor %}
 							</div>
 						</div>

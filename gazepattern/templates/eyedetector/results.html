@@ -24,20 +24,22 @@
 						<div class="image-list-description">
 							{{ experiment.description }}
 							{% if experiment.functions %}
-								<div class="div">
-									<b>Functions: </b> {{ experiment.functions }}
-								</div>
-								<div class="div">
-									<b>Relations: </b> {{ experiment.relations }}
-								</div>
-								<div class="div">
-									<b>Resultado: </b> {{ experiment.result }}
+								<div class="experiment-list">
+									<div class="div">
+										<b>Functions: </b> {{ experiment.functions }}
+									</div>
+									<div class="div">
+										<b>Relations: </b> {{ experiment.relations }}
+									</div>
+									<div class="div">
+										<b>Resultado: </b> {{ experiment.result }}
+									</div>
 								</div>
 							{% endif %}
-							<div class="areas">
+							<div class="experiment-list">
 								AREAS SELECCIONADAS: 
 								{% for area in experiment.image.rectangles.all %}
-									<div class="area"> {{ area.name }} </div>
+									<div class="experiment-item"> {{ area.name }} </div>
 								{% endfor %}
 							</div>
 						</div>	

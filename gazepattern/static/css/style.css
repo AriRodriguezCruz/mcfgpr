@@ -4,6 +4,7 @@
 	padding: 0;
 	box-sizing: border-box;
 	font-size: 16px;
+	font-family: 'Roboto', sans-serif;
 	text-decoration: none;
 	list-style: none;
 }
@@ -12,9 +13,16 @@
 	display: flex;
 	flex-direction: row;
 	align-items: center;
+	justify-content: space-between;
 	margin: 20px;
 	border: 1px solid #000;
 	border-radius: 20px;
+}
+
+.header-title{
+	padding: 10px;
+	border: 1px solid #000;
+	margin: 10px;
 }
 
 .nav{
@@ -133,4 +141,48 @@
 	border-radius: 10px;
 	color: #000;
 	font-weight: bold;
+}
+
+.experiment-list{
+	border: 1px solid #000;
+	margin: 10px 5px;
+	padding: 10px;
+}
+
+.experiment-item{
+	margin: 10px 5px;
+	border-bottom: 1px solid #000;
+}
+
+.home{
+	display: grid;
+	grid-template-columns: 1fr 3fr;
+}
+
+.home-image{
+	border: 2px solid #000;
+	border-radius: 20px 20px 100px 100px;
+	overflow: hidden;
+	padding: 10px;
+}
+
+.home-image img{
+	width: 100%;
+}
+
+.home-info{
+	display: flex;
+	flex-direction: column;
+}
+
+.home-info-title{
+	font-size: 30px;
+	padding: 5px 20px;
+	margin: 20px 0 0 0;
+}
+
+.home-info-description{
+	padding: 10px 20px;
+	width: 80%;
+	font-size: 18px;
 }
