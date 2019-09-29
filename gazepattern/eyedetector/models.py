@@ -34,6 +34,9 @@ class Experiment(models.Model):
 	name = models.CharField(max_length=50)
 	description = models.CharField(max_length=350, blank=True, null=True)
 	image = models.ForeignKey(Image, related_name='experiments', on_delete=models.CASCADE)
+	functions = models.CharField(max_length=500, blank=True, null=True)
+	relations = models.CharField(max_length=500, blank=True, null=True)
+	result = models.CharField(max_length=500, blank=True, null=True)
 
 	def __str__(self):
 		return u"{} - {}".format(self.name, self.description)
@@ -41,6 +44,7 @@ class Experiment(models.Model):
 
 class ExperimentPoint(models.Model):
 
+	experiment = models.ForeignKey(Experiment, related_name='points', on_delete=models.CASCADE)
 	fixation_number = models.IntegerField()
 	x = models.DecimalField(max_digits=50, decimal_places=30)
 	y = models.DecimalField(max_digits=50, decimal_places=30) 

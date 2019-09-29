@@ -164,8 +164,8 @@ class ShowImage(object):
         # create a menu bar with an Exit command
         menubar = tk.Menu(root)
         filemenu = tk.Menu(menubar, tearoff=0)
-        filemenu.add_command(label="Exit", command=root.destroy)
-        menubar.add_cascade(label="File", menu=filemenu)
+        filemenu.add_command(label="Terminar Experimento", command=root.destroy)
+        menubar.add_cascade(label="Experimento", menu=filemenu)
         root.config(menu=menubar)
 
         root.mainloop()

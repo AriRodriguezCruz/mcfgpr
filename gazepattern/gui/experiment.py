@@ -6,13 +6,14 @@ from __future__ import unicode_literals
 import cv2
 from pyModelChecking import *
 from pyModelChecking.LTL import *
+from pyModelChecking.CTL import *
 import numpy as np
 from . import ransac
 from . import ClassyVirtualReferencePoint as ClassyVirtualReferencePoint
 from decimal import Decimal
 import threading
 #gazepattern
-from eyedetector.models import XYPupilFrame
+from eyedetector.models import XYPupilFrame, ExperimentPoint
 from .application import ShowImage
 
 
@@ -553,7 +554,7 @@ class Training(CheckCamera):
             vc.release() #close the camera
     '''
 
-    def make_model(self, coords):
+    def make_model(self, coords, aois):
         """
         El modelo es la unión de las zonas que se etiquetaron y las fijaciones
 
@@ -577,7 +578,8 @@ class Training(CheckCamera):
                 else:
                     functions.update({index_fixation: ['undefined']})
         relations.append((len(relations), len(relations)))
-
+        return relations, functions
+        '''
         def getResult(relations,functions):
             """
             Una vez que se tiene el modelo, se le pide al usuario la fórmula que es la que se va a ocupar para verificar si se cumple o no
@@ -590,6 +592,8 @@ class Training(CheckCamera):
             print(modelcheck(K, phi))
 
             result = modelcheck(K, phi)
+            return result
+        '''
             # w_result = tk.Tk()
             #
             # w_result.title("Result")
@@ -598,16 +602,16 @@ class Training(CheckCamera):
             # label_two = tk.Label(w_result, text=phi)
             # label_two.grid(row=0, column=1)
 
-            label_three = tk.Label(formula, text="Result")
-            label_three.grid(row=1, column=0)
-            label_three = tk.Label(formula, text=result)
-            label_three.grid(row=1, column=1)
+            #label_three = tk.Label(formula, text="Result")
+            #label_three.grid(row=1, column=0)
+            #label_three = tk.Label(formula, text=result)
+            #label_three.grid(row=1, column=1)
 
-        img = cv2.imread('lenguajes.jpg')
-        for index_fixation, row in enumerate(coords):
-            print(int(row['x']), int(row['y']))
-            # cv2.circle(img, (int(row['x']), int(row['y'])), 15, (0, 0, 255), -1)
-
+        #img = cv2.imread('lenguajes.jpg')
+        #for index_fixation, row in enumerate(coords):
+        #    print(int(row['x']), int(row['y']))
+        #    # cv2.circle(img, (int(row['x']), int(row['y'])), 15, (0, 0, 255), -1)
+        '''
             font = cv2.FONT_HERSHEY_SIMPLEX
             bottomLeftCornerOfText = (int(row['x']), int(row['y']))
             fontScale = 1
@@ -621,12 +625,12 @@ class Training(CheckCamera):
                         fontColor,
                         lineType)
             # img[int(row['y']), int(row['x'])] = [0, 0, 255]
-
+        
         cv2.imshow('image', img)
         cv2.imwrite("scanpath.png", img) #save the last-displayed image to file, for our report
         cv2.waitKey(0)
         cv2.destroyAllWindows()
-
+        '''
         # formula = tk.Tk()
         #
         # formula.title("Formula")
@@ -638,6 +642,20 @@ class Training(CheckCamera):
         # theformula.grid(row=0, column=1)
         # btn = tk.Button(formula, text="Model check", command= lambda: getResult(relations,functions))
         # btn.grid(row=0, column=3)
+
+
+    def getResult(self, relations,functions, phi=""):
+        """
+        Una vez que se tiene el modelo, se le pide al usuario la fórmula que es la que se va a ocupar para verificar si se cumple o no
+
+        """
+
+        K = Kripke(R=relations, L=functions)
+        print(K)
+        print(modelcheck(K, phi))
+
+        result = modelcheck(K, phi)
+        return result
 
     def get_features(self, XYOffsets, quadratic = True):
         """
@@ -682,10 +700,11 @@ class MakeExperiment(Training):
     readSuccessful = False
     app_has_destroy = False
 
-    def __init__(self, image_root, **kwargs):
+    def __init__(self, image_root, experiment):
         from . import pygamestuff
         self.make_detector()
         self.image_root = image_root
+        self.experiment = experiment
         crosshair = pygamestuff.Crosshair([7, 2], quadratic = False)
         vc = cv2.VideoCapture(0) # Initialize the default camera
         if vc.isOpened(): # try to get the first frame
@@ -696,10 +715,10 @@ class MakeExperiment(Training):
         recordedEvents=0 #numero de fijaciones
         HT = None
         XYPupilFrame.objects.all().delete()
+        coords = []
+        points = 0
+        clicks = 0
         try:
-            coords = []
-            points = 0
-            clicks = 0
             while (self.readSuccessful and recordedEvents < MAX_SAMPLES_TO_RECORD and not crosshair.userWantsToQuit) and not self.app_has_destroy:
                 points += 1
                 pupilOffsetXYList = self.get_offset(frame, allowDebugDisplay=False)
@@ -747,7 +766,7 @@ class MakeExperiment(Training):
                             'y': gazeCoords[0,1] #las fijaciones son los puntos que detecta la aplicacion que un usuario mira
                         })
                         fixations += 1
-                print(self.app_has_destroy)
+                    print("coords : ", coords)
                 self.readSuccessful, frame = vc.read()        
         
             crosshair.write() #writes data to a csv for MATLAB
@@ -755,8 +774,35 @@ class MakeExperiment(Training):
             resultXYpxpy = np.array(crosshair.result)
         finally:
             vc.release() #close the camera
-            #show_image_thread.join()
-            #self.make_model(coords)
+            #relations, functions = self.make_model(coords)
+            #result = self.getResult(relations, functions)
+            for coor in coords:
+                experiment_point = ExperimentPoint()
+                experiment_point.fixation_number = coor.get('fixation_number')
+                experiment_point.x = coor.get('x')
+                experiment_point.y = coor.get('y')
+                experiment_point.experiment = self.experiment
+                experiment_point.save()
  
     def show_image(self):
         ShowImage(self.image_root, self)
+
+class GenerateResults(MakeExperiment):
+
+    def __init__(self, experiment, formula):
+        self.experiment = experiment
+        self.phi = formula
+        self.phi = eval(self.phi)
+        #self.generate_results()
+
+    def generate_result(self):
+        experiment = self.experiment
+        coords = [{'fixation_number': point.fixation_number, 'x': float(point.x), 'y': float(point.y)} for point in experiment.points.all() ]
+        aois = [{"aoi": aoi.name,
+                "x0": float(aoi.x0),
+                "x1": float(aoi.x1), 
+                "y0": float(aoi.y0),
+                "y1": float(aoi.y1)} for aoi in experiment.image.rectangles.all()]
+        relations, functions = self.make_model(coords, aois)        
+        result = self.getResult(relations,functions, phi=self.phi)
+        return relations, functions, result

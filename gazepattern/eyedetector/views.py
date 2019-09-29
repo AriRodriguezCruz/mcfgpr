@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, reverse, redirect
 from django.db import transaction
 #python 
 # - - -
 #gazepattern
 from utils.views import BaseView
-from eyedetector.forms import ImageForm, MakeExperimentForm
+from eyedetector.forms import ImageForm, MakeExperimentForm, GenerateResultsForm
 from eyedetector.models import Image, Experiment
 from gui.application import Application
-from gui.experiment import CheckCamera, Training, MakeExperiment
+from gui.experiment import CheckCamera, Training, MakeExperiment, GenerateResults
 
 class App(object):
 	"""docstring for App"""
@@ -57,7 +57,7 @@ class ImageClasificarView(BaseView):
 		context = self.get_context(request, image_id)
 		image = context.get('image')
 		app = Application(image.image.file.name, image)
-		return render(request, self.template, context)
+		return redirect(reverse("images"))
 
 
 class ExperimentView(BaseView):
@@ -78,7 +78,7 @@ class CheckCameraView(BaseView):
 
 	def get(self, request,  *args):
 		CheckCamera()
-		return render(request, self.template, locals())
+		return redirect(reverse('experiment'))	
 
 
 class TrainView(BaseView):
@@ -86,12 +86,15 @@ class TrainView(BaseView):
 
 	def get(self, request, *args):
 		Training()
-		return render(request, self.template, locals())
+		return redirect(reverse('experiment'))	
 
 
 class MakeExperimentView(BaseView):
 
 	template = "generic_template.html"
+
+	def get(self, request, image_id):
+		return redirect(reverse('experiment'))
 
 	@transaction.atomic
 	def post(self, request, image_id):
@@ -103,5 +106,49 @@ class MakeExperimentView(BaseView):
 			experiment.description = request.POST.get('description')
 			experiment.image = image
 			experiment.save()
-			MakeExperiment(image.image.file.name)
-		return render(request, self.template, {})					
+			MakeExperiment(image.image.file.name, experiment)
+		return redirect(reverse('experiment'))					
+
+
+class ResultsView(BaseView):
+	template = "eyedetector/results.html"
+	form_class = GenerateResultsForm
+
+	def get_context(self, request):
+		context = {}
+		context['experiments'] = Experiment.objects.all()
+		context['form'] = self.form_class
+		context['error'] = request.GET.get("error", False)
+		return context
+
+	def post(self, request):
+		context = self.get_context(request)
+		form = self.form_class(request.POST)
+		if form.is_valid():
+			phi = form.data.get('phi')
+		return render(request, self.template, context)
+
+
+class MakeResultsView(BaseView):
+	template = "eyedetector/results.html"
+	form_class = GenerateResultsForm
+
+	def get(self, request, experiment_id):
+		return self.post(request, experiment_id)
+
+	def post(self, request, experiment_id):
+		form = self.form_class(request.POST)
+		if form.is_valid():
+			formula = form.data.get("phi")
+			experiment = get_object_or_404(Experiment, pk=experiment_id)
+			try:
+				result_manager = GenerateResults(experiment, formula)
+				relations, functions, result = result_manager.generate_result()
+				experiment.relations = str(relations)
+				experiment.functions = str(functions)
+				experiment.result = str(result)
+				experiment.save()
+			except Exception as e:
+				url = "{}{}".format(reverse('results'), r'?error=Ocurrio un error, verifique que su formula sea correcta'.replace(" ", r"%20"))
+				return redirect(url)
+		return redirect(reverse("results"))

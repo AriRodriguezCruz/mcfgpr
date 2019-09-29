@@ -25,3 +25,7 @@ class ImageForm(forms.Form):
 class MakeExperimentForm(forms.Form):
 	name = forms.CharField(required=True, max_length=30, widget=TextWidget(label="Nombre"))
 	description = forms.CharField(required=True, max_length=320, widget=TextWidget(label="Descripcion"))
+
+
+class GenerateResultsForm(forms.Form):
+	phi = forms.CharField(required=True, max_length=320, widget=TextWidget(label="Inserte la formula"))

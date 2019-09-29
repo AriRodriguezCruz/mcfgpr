@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block container %}
+	<div class="title">
+		Subir y clasificar imagenes.
+	</div>
+	{% if error %}
+		<div class="error">
+			{{ error }}
+		</div>
+	{% endif %}
+	<article class="container">
+		<div class="image-list">
+			{% for experiment in experiments %}
+				<div class="image-list-item">
+					<div class="image-list-icon-container">
+						<img src=" {{ experiment.image.image.url }} " class="image-list-icon" />
+					</div>
+					<div class="image-list-content">
+						<div class="image-list-name">
+							{{ experiment.name }}
+						</div>
+						<div class="image-list-description">
+							{{ experiment.description }}
+							{% if experiment.functions %}
+								<div class="div">
+									<b>Functions: </b> {{ experiment.functions }}
+								</div>
+								<div class="div">
+									<b>Relations: </b> {{ experiment.relations }}
+								</div>
+								<div class="div">
+									<b>Resultado: </b> {{ experiment.result }}
+								</div>
+							{% endif %}
+							<div class="areas">
+								AREAS SELECCIONADAS: 
+								{% for area in experiment.image.rectangles.all %}
+									<div class="area"> {{ area.name }} </div>
+								{% endfor %}
+							</div>
+						</div>	
+					</div>
+					<form class="image-list-content" method="POST" action="{% url "make_results" experiment.pk %}">
+						{% csrf_token %}
+						{% for field in form %}
+							{{ field }}
+						{% endfor %}
+						<button target="_blank" class="button-form">Generar resultados</button>
+					</form>
+				</div>
+			{% endfor %}
+		</div>
+	</article>
+{% endblock %}
