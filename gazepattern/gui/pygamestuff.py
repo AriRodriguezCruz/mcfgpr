@@ -11,6 +11,9 @@
 import sys, pygame
 from pygame.locals import *
 import os
+BASE_DIR = os.path.dirname(os.path.dirname(__file__))
+print(BASE_DIR)
+
 
 pygame.init()
 size = width, height = 1350, 750
@@ -21,7 +24,7 @@ class Crosshair(object):
     def __init__(self, speed = [1, 1], quadratic = True):
         self.quadratic = quadratic
         self.speed = speed
-        self.cross = pygame.image.load('gaussianBlur.png')#pygame.image.load('bmpcrosshair.bmp')
+        self.cross = pygame.image.load(BASE_DIR + '/static/img/gaussianBlur.png')#pygame.image.load('bmpcrosshair.bmp')
         self.crossrect = self.cross.get_rect()
 ##        print self.crossrect.center, "is the center"
 ##        print self.crossrect, "is the rect"
