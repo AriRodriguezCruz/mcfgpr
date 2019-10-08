@@ -7,6 +7,7 @@ import cv2
 from pyModelChecking import *
 from pyModelChecking.LTL import *
 from pyModelChecking.CTL import *
+import os
 import numpy as np
 from . import ransac
 from . import ClassyVirtualReferencePoint as ClassyVirtualReferencePoint
@@ -16,6 +17,7 @@ import threading
 from eyedetector.models import XYPupilFrame, ExperimentPoint
 from .application import ShowImage
 
+BASE_DIR = os.path.dirname(__file__)
 
 class LinearLeastSquaresModel:
     """linear system solved using linear least squares
@@ -44,8 +46,8 @@ class LinearLeastSquaresModel:
 
 class CheckCamera(object):
 
-    HAARFACECASCADE = cv2.CascadeClassifier("haarcascades/haarcascade_frontalface_alt.xml")
-    HAAREYECASCADE = cv2.CascadeClassifier("haarcascades/haarcascade_eye.xml")
+    HAARFACECASCADE = cv2.CascadeClassifier(BASE_DIR + "/haarcascades/haarcascade_frontalface_alt.xml")
+    HAAREYECASCADE = cv2.CascadeClassifier(BASE_DIR + "/haarcascades/haarcascade_eye.xml")
     WINDOW_NAME = "Verificar camara."
     VERBOSE = True
     BLOWUP_FACTOR = 1 # Resizes image before doing the algorithm. Changing to 2 makes things really slow. So nevermind on this.
