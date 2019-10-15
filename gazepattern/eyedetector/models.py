@@ -48,3 +48,7 @@ class ExperimentPoint(models.Model):
 	fixation_number = models.IntegerField()
 	x = models.DecimalField(max_digits=50, decimal_places=30)
 	y = models.DecimalField(max_digits=50, decimal_places=30) 
+
+
+class ExperimentPointCSV(models.Model):
+	file = models.FileField(upload_to="csv/")
