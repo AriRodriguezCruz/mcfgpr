@@ -6,7 +6,6 @@ from __future__ import unicode_literals
 import cv2
 from pyModelChecking import *
 from pyModelChecking.LTL import *
-from pyModelChecking.CTL import *
 import os
 import numpy as np
 from . import ransac
@@ -559,7 +558,6 @@ class Training(CheckCamera):
     def make_model(self, coords, aois):
         """
         El modelo es la unión de las zonas que se etiquetaron y las fijaciones
-
         """
 
         segmentation = aois
@@ -572,7 +570,6 @@ class Training(CheckCamera):
             for index_segment, segment in enumerate(segmentation):
                 if (float(row['x']) >= float(segment['x0']) and float(row['x']) <= float(segment['x1'])):
                     if (float(row['y']) >= float(segment['y0']) and float(row['y']) <= float(segment['y1'])):
-                        # print ('fixation index', index_fixation, 'segment index', index_segment, 'match')
                         functions.update({index_fixation: [segment['aoi']]})
                         break
                     else:
@@ -581,82 +578,16 @@ class Training(CheckCamera):
                     functions.update({index_fixation: ['undefined']})
         relations.append((len(relations), len(relations)))
         return relations, functions
-        '''
-        def getResult(relations,functions):
-            """
-            Una vez que se tiene el modelo, se le pide al usuario la fórmula que es la que se va a ocupar para verificar si se cumple o no
-
-            """
-
-            phi = theformula.get()
-            K = Kripke(R=relations, L=functions)
-            print(K)
-            print(modelcheck(K, phi))
-
-            result = modelcheck(K, phi)
-            return result
-        '''
-            # w_result = tk.Tk()
-            #
-            # w_result.title("Result")
-            # label_one = tk.Label(w_result, text="Formula")
-            # label_one.grid(row=0, column=0)
-            # label_two = tk.Label(w_result, text=phi)
-            # label_two.grid(row=0, column=1)
-
-            #label_three = tk.Label(formula, text="Result")
-            #label_three.grid(row=1, column=0)
-            #label_three = tk.Label(formula, text=result)
-            #label_three.grid(row=1, column=1)
-
-        #img = cv2.imread('lenguajes.jpg')
-        #for index_fixation, row in enumerate(coords):
-        #    print(int(row['x']), int(row['y']))
-        #    # cv2.circle(img, (int(row['x']), int(row['y'])), 15, (0, 0, 255), -1)
-        '''
-            font = cv2.FONT_HERSHEY_SIMPLEX
-            bottomLeftCornerOfText = (int(row['x']), int(row['y']))
-            fontScale = 1
-            fontColor = (0, 0, 255)
-            lineType = 2
-
-            cv2.putText(img, str(index_fixation),
-                        bottomLeftCornerOfText,
-                        font,
-                        fontScale,
-                        fontColor,
-                        lineType)
-            # img[int(row['y']), int(row['x'])] = [0, 0, 255]
-        
-        cv2.imshow('image', img)
-        cv2.imwrite("scanpath.png", img) #save the last-displayed image to file, for our report
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
-        '''
-        # formula = tk.Tk()
-        #
-        # formula.title("Formula")
-        # labelone = tk.Label(formula, text="Formula")
-        # labelone.grid(row=0, column=0)
-        # name = tk.StringVar()
-        #
-        # theformula = tk.Entry(formula, textvariable=name)
-        # theformula.grid(row=0, column=1)
-        # btn = tk.Button(formula, text="Model check", command= lambda: getResult(relations,functions))
-        # btn.grid(row=0, column=3)
 
 
     def getResult(self, relations,functions, phi=""):
         """
         Una vez que se tiene el modelo, se le pide al usuario la fórmula que es la que se va a ocupar para verificar si se cumple o no
-
         """
 
         K = Kripke(R=relations, L=functions)
-        print(K)
-        print(modelcheck(K, phi))
-
         result = modelcheck(K, phi)
+
         return result
 
     def get_features(self, XYOffsets, quadratic = True):
@@ -795,7 +726,6 @@ class GenerateResults(MakeExperiment):
         self.experiment = experiment
         self.phi = formula
         self.phi = eval(self.phi)
-        #self.generate_results()
 
     def generate_result(self):
         experiment = self.experiment
