@@ -728,6 +728,6 @@ class GenerateResults(MakeExperiment):
                 "x1": float(aoi.x1), 
                 "y0": float(aoi.y0),
                 "y1": float(aoi.y1)} for aoi in experiment.image.rectangles.all()]
-        relations, functions = self.make_model(coords, aois)        
+        relations, functions = self.make_model(coords, aois)
         result = self.getResult(relations,functions, phi=self.phi)
         return relations, functions, result
