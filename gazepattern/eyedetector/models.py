@@ -37,6 +37,7 @@ class Experiment(models.Model):
 	functions = models.CharField(max_length=5000, blank=True, null=True)
 	relations = models.CharField(max_length=5000, blank=True, null=True)
 	result = models.CharField(max_length=5000, blank=True, null=True)
+	phi = models.CharField(max_length=500, blank=True, null=True)
 	created_on = models.DateTimeField(auto_now_add=True)
 
 	def __str__(self):

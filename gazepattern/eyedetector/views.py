@@ -147,6 +147,7 @@ class MakeResultsView(BaseView):
 				experiment.relations = str(relations)
 				experiment.functions = str(functions)
 				experiment.result = str(result)
+				experiment.phi = str(formula)
 				experiment.save()
 				if not str(formula) in [experimentfunction.function for experimentfunction in experiment.experimentfunctions.all()]:
 					experiment_function = ExperimentFunction()

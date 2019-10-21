@@ -33,7 +33,10 @@
 									    <li class="list-group-item">Relaciones {{ experiment.relations }} </li>
 									</ul>
 									<ul class="list-group list-group-flush">
-									    <li class="list-group-item">Funciones {{ experiment.relations }} </li>
+									    <li class="list-group-item">Funciones {{ experiment.functions }} </li>
+									</ul>
+									<ul class="list-group list-group-flush">
+									    <li class="list-group-item">Formula {{ experiment.phi }} </li>
 									</ul>
 									<ul class="list-group list-group-flush">
 									    <li class="list-group-item font-weight-bold">Resultado {{ experiment.result }} </li>
@@ -79,8 +82,8 @@
 										<option value="{{ obj.function }}">{{ obj }}</option>
 									{% endfor %}
 								</select>
+								<button target="_blank" class="btn btn-secondary">Generar resultados</button>
 							{% endif %}
-							<button target="_blank" class="btn btn-secondary">Generar resultados</button>
 						</form>
 				</div>
 			</div>
