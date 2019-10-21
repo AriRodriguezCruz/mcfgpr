@@ -37,6 +37,7 @@ class Experiment(models.Model):
 	functions = models.CharField(max_length=5000, blank=True, null=True)
 	relations = models.CharField(max_length=5000, blank=True, null=True)
 	result = models.CharField(max_length=5000, blank=True, null=True)
+	created_on = models.DateTimeField(auto_now_add=True)
 
 	def __str__(self):
 		return u"{} - {}".format(self.name, self.description)
@@ -49,6 +50,13 @@ class ExperimentPoint(models.Model):
 	x = models.DecimalField(max_digits=50, decimal_places=30)
 	y = models.DecimalField(max_digits=50, decimal_places=30) 
 
+
+class ExperimentFunction(models.Model):
+	experiment = models.ForeignKey(Experiment, blank=True, null=True, on_delete=models.CASCADE, related_name="experimentfunctions")
+	function = models.TextField(max_length=200, help_text="Funcion en formato de codigo python")
+
+	def __str__(self):
+		return self.function
 
 class ExperimentPointCSV(models.Model):
 	file = models.FileField(upload_to="csv/")

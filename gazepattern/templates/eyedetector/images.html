@@ -13,25 +13,22 @@
 					{{ field }}
 				</div>
 			{% endfor %}
-			<button type="submit" class="button-form"> Enviar</button>
+			<button type="submit" class="btn btn-secondary"> Enviar</button>
 		</form>
-		<div class="image-list">
+
+		<div class="container">
 			{% for image in images %}
-				<div class="image-list-item">
-					<div class="image-list-icon-container">
-						<img src=" {{ image.image.url }} " class="image-list-icon" />
+				<div class="row border border-primary pt-3 pb-3 rounded">
+					<div class="col-3 border-right border-dark p-3">
+						<img src="{{ image.image.url }}" class="col-12" />
 					</div>
-					<div class="image-list-content">
-						<div class="image-list-name">
-							{{ image.name }}
-						</div>
-						<div class="image-list-description">
-							{{ image.description }}
-						</div>
+					<div class="col-6">
+						<p class="text-lg-left font-weight-bold">{{ image.name }}</p>
+						<p class="text-xl-left">{{ image.description }}</p>
 					</div>
-					<div class="image-list-content">
-						<a href="{{ image.image.url }}" target="_blank" class="button-form">Descargar</a>
-						<a href="{% url 'clasificar' image.pk %}" target="_blank" class="button-form">Clasificar</a>
+					<div class="col-3">
+						<a href="{{ image.image.url }}" target="_blank" class="btn btn-secondary">Descargar</a>
+						<a href="{% url 'clasificar' image.pk %}" target="_blank" class="btn btn-success">Clasificar</a>
 					</div>
 				</div>
 			{% endfor %}

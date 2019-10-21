@@ -6,7 +6,7 @@ from django.db import transaction
 import csv
 from decimal import Decimal
 #gazepattern
-from .models import Experiment, ExperimentPoint, Image, ImageRectangle, ExperimentPointCSV
+from .models import Experiment, ExperimentPoint, Image, ImageRectangle, ExperimentPointCSV, ExperimentFunction
 
 @transaction.atomic
 def procesar(modeladmin, request, queryset):
@@ -59,8 +59,15 @@ class ImageRectangleAdmin(admin.ModelAdmin):
     ordering = ['id']
 
 
+class ExperimentFunctionAdmin(admin.ModelAdmin):
+
+    list_display = ['id', 'function']
+    ordering = ['id']
+
+
 admin.site.register(ExperimentPointCSV, ExperimentPointCSVAdmin)
 admin.site.register(ExperimentPoint, ExperimentPointAdmin)
 admin.site.register(Image, ImageAdmin)
 admin.site.register(Experiment, ExperimentAdmin)
 admin.site.register(ImageRectangle, ImageRectangleAdmin)
+admin.site.register(ExperimentFunction, ExperimentFunctionAdmin)

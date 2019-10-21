@@ -9,53 +9,47 @@
 		<a href="{% url 'check_camera' %}" class="action">
 			Verificar camara.
 		</a>
-		<!--
-		<a href="{% url 'train' %}" class="action">
-			Prueba de seguimiento ocular.
-		</a>
-		-->
-		<div class="image-list">
-			{% for image in images %}
-				<div class="image-list-item">
-					<div class="image-list-icon-container">
-						<img src=" {{ image.image.url }} " class="image-list-icon" />
-					</div>
-					<div class="image-list-content">
-						<div class="image-list-name">
-							{{ image.name }}
-						</div>
-						<div class="image-list-description">
-							{{ image.description }}
-							<div class="experiment-list">
-								<div class="experiment-list-title">
-									Experimentos:
+	</article>
+
+	<div class="container">
+		{% for image in images %}
+			<div class="row border border-primary pt-3 pb-3 rounded">
+				<div class="col-3 border-right border-dark p-3">
+					<img src="{{ image.image.url }}" class="col-12" />
+				</div>
+				<div class="col-6">
+					<p class="text-lg-left font-weight-bold">{{ image.name }}</p>
+					<p class="text-xl-left">{{ image.description }}</p>
+					<div class="col-12">
+						{% for experiment in image.experiments.all %}
+							<div class="col-6">
+								<div class="card text-center">
+								  	<div class="card-header">
+								    	{{ experiment.name }}
+								  	</div>
+								 	<div class="card-body">
+								    	<p class="card-text">{{ experiment.description }}</p>
+								    </div>
+								 	<div class="card-footer text-muted">
+								   		{{ experiment.created_on }}
+								 	</div>
 								</div>
-								{% for experiment in image.experiments.all %}
-									<div class="experiment-item">
-										<div class="experiment-subitem">
-											<b>Nombre: {{ experiment.name }}</b>
-										</div>
-										<div class="experiment-subitem">
-											<b>Descripcion: {{ experiment.description | default_if_none:"Sin descripcion" }}</b>
-										</div>
-									</div>
-								{% empty %}
-									<div class="experiment-subitem">
-										No hay experimentos asociaods a esta imagen.
-									</div>
-								{% endfor %}
 							</div>
-						</div>
+						{% endfor %}
 					</div>
-					<form  action="{% url 'make_experiment' image.pk %}" method="POST" class="image-list-content">
+				</div>
+				<form action="{% url 'make_experiment' image.pk %}" method="POST" class="col-3">
 						{% csrf_token %}
 						{% for field in form %}
 							{{ field }}
 						{% endfor %}
-						<button href="{{ image.image.url }}" class="button-form">Agregar un experimento</button>
-					</form>
-				</div>
-			{% endfor %}
-		</div>
-	</article>
+						<button href="{{ image.image.url }}" class="btn btn-secondary mt-2 text-cente ">Agregar un experimento</button>
+				</form>
+			</div>
+		{% endfor %}
+	</div>
+
+
 {% endblock %}
+
+

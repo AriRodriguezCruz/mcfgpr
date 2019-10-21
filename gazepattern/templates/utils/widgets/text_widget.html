@@ -1,4 +1,1 @@
-{% if widget.label %}
-	<label for="{{ widget.name }}"> {{ widget.label }} </label>
-{% endif %}
-<input type="text" class="field" name="{{ widget.name }}" id="{{ widget.name }}" {% if widget.required == True %}required{% endif %} value="{{ widget.value }}"  autocomplete="off" />  
+<input type="text" class="form-control mb-2 mt-2" name="{{ widget.name }}" id="{{ widget.name }}" {% if widget.required == True %}required{% endif %} value="{{ widget.value }}"  autocomplete="off" placeholder="{{ widget.label }}" />  

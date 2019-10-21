@@ -6,53 +6,85 @@
 		Subir y clasificar imagenes.
 	</div>
 	{% if error %}
-		<div class="error">
-			{{ error }}
+		<div class="alert alert-dark" role="alert">
+	  		{{ error }}
 		</div>
 	{% endif %}
-	<article class="container">
-		<div class="image-list">
-			{% for experiment in experiments %}
-				<div class="image-list-item">
-					<div class="image-list-icon-container">
-						<img src=" {{ experiment.image.image.url }} " class="image-list-icon" />
-					</div>
-					<div class="image-list-content">
-						<div class="image-list-name">
-							{{ experiment.name }}
-						</div>
-						<div class="image-list-description">
-							{{ experiment.description }}
-							{% if experiment.functions %}
-								<div class="experiment-list">
-									<div class="div">
-										<b>Functions: </b> {{ experiment.functions }}
-									</div>
-									<div class="div">
-										<b>Relations: </b> {{ experiment.relations }}
-									</div>
-									<div class="div">
-										<b>Resultado: </b> {{ experiment.result }}
-									</div>
-								</div>
-							{% endif %}
-							<div class="experiment-list">
-								AREAS SELECCIONADAS: 
-								{% for area in experiment.image.rectangles.all %}
-									<div class="experiment-item"> {{ area.name }} </div>
-								{% endfor %}
-							</div>
-						</div>	
-					</div>
-					<form class="image-list-content" method="POST" action="{% url "make_results" experiment.pk %}">
-						{% csrf_token %}
-						{% for field in form %}
-							{{ field }}
-						{% endfor %}
-						<button target="_blank" class="button-form">Generar resultados</button>
-					</form>
+
+	<div class="container">
+		{% for experiment in experiments %}
+			<div class="row border border-primary pt-3 pb-3 rounded">
+				<div class="col-3 border-right border-dark p-3">
+					<img src="{{ experiment.image.image.url }}" class="col-12" />
 				</div>
-			{% endfor %}
-		</div>
-	</article>
+				<div class="col-6">
+					<p class="text-lg-left font-weight-bold">{{ experiment.name }}</p>
+					<p class="text-xl-left">{{ experiment.description }}</p>
+					<p class="text-sm-left"> {{ experiment.created_on }} </p>
+					<div class="col-12 mt-3 mb-3">
+						{% if experiment.result %}
+
+					 		<div class="col-12">
+					 			<div class="card">
+									<div class="card-body">
+									    <h5 class="card-title">Resultados del experimento</h5>
+									</div>
+								    <ul class="list-group list-group-flush">
+									    <li class="list-group-item">Relaciones {{ experiment.relations }} </li>
+									</ul>
+									<ul class="list-group list-group-flush">
+									    <li class="list-group-item">Funciones {{ experiment.relations }} </li>
+									</ul>
+									<ul class="list-group list-group-flush">
+									    <li class="list-group-item font-weight-bold">Resultado {{ experiment.result }} </li>
+									</ul>
+								</div>
+					 		</div>
+
+						{% endif %}
+
+						<div class="row mt-4 border-top border-secundary">
+							<p class="col-12">Areas seleccionadas</p>
+							<div class="col-3 border-bottom border-dark m-1">Nombre</div>
+							<div class="col-2 border-bottom border-dark m-1">X1</div>
+							<div class="col-2 border-bottom border-dark m-1">X2</div>
+							<div class="col-2 border-bottom border-dark m-1">Y1</div>
+							<div class="col-2 border-bottom border-dark m-1">Y2</div>
+							{% for rectangle in experiment.image.rectangles.all %}
+								<div class="col-3 border-bottom border-dark m-1">{{ rectangle.name }}</div>
+								<div class="col-2 border-bottom border-dark m-1">{{ rectangle.x0 }}</div>
+								<div class="col-2 border-bottom border-dark m-1">{{ rectangle.x1 }}</div>
+								<div class="col-2 border-bottom border-dark m-1">{{ rectangle.y0 }}</div>
+								<div class="col-2 border-bottom border-dark m-1">{{ rectangle.y1 }}</div>
+							{% endfor %}
+						</div>
+
+				 	</div>
+				</div>
+				<div class="col-3">
+					<form method="POST" action="{% url 'make_results' experiment.pk %}">
+							{% csrf_token %}
+							{% for field in form %}
+								{{ field }}
+							{% endfor %}
+							<button target="_blank" class="btn btn-secondary">Generar resultados</button>
+						</form>
+						<form method="POST" action="{% url 'make_results' experiment.pk %}">
+							{% csrf_token %}
+							{% if experiment.experimentfunctions.exists %}
+								<label for="">Selecciona una formula</label>
+								<select name="phi" class="form-control">
+									<option value=""> --- </option>
+									{% for obj in experiment.experimentfunctions.all %}
+										<option value="{{ obj.function }}">{{ obj }}</option>
+									{% endfor %}
+								</select>
+							{% endif %}
+							<button target="_blank" class="btn btn-secondary">Generar resultados</button>
+						</form>
+				</div>
+			</div>
+		{% endfor %}
+	</div>
+
 {% endblock %}

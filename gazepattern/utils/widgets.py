@@ -71,5 +71,39 @@ class ChoiceWidget(SimpleCustomWidget):
             }
         }
 
+
+class QueryAsChoiceWidget(SimpleCustomWidget):
+    template = "utils/widgets/query_as_choice_widget.html"
+
+    def __init__(self, *args, **kwargs):
+        self.queryset = kwargs.pop("queryset", None)
+        assert(self.queryset)
+        super(ChoiceWidget, self).__init__(*args, **kwargs)
+
+    def get_context(self, name, value, attrs=None):
+        choices_dict = {}
+        for obj in queryset:
+            choices_dict[obj.pk] = obj.__str__()
+
+        required = False
+        if attrs:
+            required = True if attrs.get('required', False) else False
+        
+        display = False
+        if value:
+            value = int(value)
+            display = choices_dict.get(int(value))
+
+        return {
+            'widget': {
+                'name': name,
+                'value': value,
+                'display': display,
+                'choices': choices_dict,
+                'required': required,
+            }
+        }
+
+
 class TextWidget(SimpleCustomWidget):
     template = "utils/widgets/text_widget.html"

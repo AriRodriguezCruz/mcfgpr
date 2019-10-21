@@ -1,0 +1,8 @@
+<section>
+	{% for value, display in widget.choice_dict.items %}
+		<option value="{{ value }}">{{ display }}</option>
+	{% empty %}
+		<option value=""></option>
+		<option value="">No hay formulas.</option>
+	{% endfor %}
+</section>

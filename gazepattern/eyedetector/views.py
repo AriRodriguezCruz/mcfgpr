@@ -7,7 +7,7 @@ from django.db import transaction
 #gazepattern
 from utils.views import BaseView
 from eyedetector.forms import ImageForm, MakeExperimentForm, GenerateResultsForm
-from eyedetector.models import Image, Experiment
+from eyedetector.models import Image, Experiment, ExperimentFunction
 from gui.application import Application
 from gui.experiment import CheckCamera, Training, MakeExperiment, GenerateResults
 
@@ -117,7 +117,7 @@ class ResultsView(BaseView):
 	def get_context(self, request):
 		context = {}
 		context['experiments'] = Experiment.objects.all()
-		context['form'] = self.form_class
+		context['form'] = self.form_class(experiment = Experiment.objects.all())
 		context['error'] = request.GET.get("error", False)
 		return context
 
@@ -148,6 +148,11 @@ class MakeResultsView(BaseView):
 				experiment.functions = str(functions)
 				experiment.result = str(result)
 				experiment.save()
+				if not str(formula) in [experimentfunction.function for experimentfunction in experiment.experimentfunctions.all()]:
+					experiment_function = ExperimentFunction()
+					experiment_function.function = str(formula)
+					experiment_function.experiment = experiment
+					experiment_function.save()
 			except Exception as e:
 				url = "{}{}".format(reverse('results'), r'?error=Ocurrio un error, verifique que su formula sea correcta'.replace(" ", r"%20"))
 				return redirect(url)

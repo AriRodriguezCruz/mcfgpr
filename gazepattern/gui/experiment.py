@@ -563,8 +563,6 @@ class Training(CheckCamera):
         segmentation = aois
         functions = {}
         relations = []
-        print(coords)
-        print(segmentation)
         for index_fixation, row in enumerate(coords): #se verificar cuáles fijaciones se encuentran dentro de las zonas que se definieron y si es así se agregan al modelo
             relations.append((index_fixation, index_fixation + 1))
             for index_segment, segment in enumerate(segmentation):
@@ -663,14 +661,12 @@ class MakeExperiment(Training):
                         #print( (xOffset,yOffset) )
                         #do learning here, to relate xOffset and yOffset to screenX,screenY
                         crosshair.record(pupilOffsetXYList)
-                        print(pupilOffsetXYList)
 
                         xyframemodel = XYPupilFrame()
                         xyframemodel.x = pupilOffsetXYList[0]
                         xyframemodel.y = pupilOffsetXYList[1]
                         xyframemodel.save()
 
-                        print ("recorded something")
                         crosshair.remove()
                         recordedEvents += 1
                         if recordedEvents > self.RANSAC_MIN_INLIERS:
@@ -680,7 +676,6 @@ class MakeExperiment(Training):
                             features =self.get_features(resultXYpxpy[:,:-2])
                             featuresAndLabels = np.concatenate( (features, resultXYpxpy[:,-2:] ) , axis=1)
                             HT = self.RANSACFitTransformation(featuresAndLabels)
-                            print (HT)
                     if HT is not None: # dibujar el circulo estimando la mirada
                         #print('ya empieza la estimacion')
                         #print(messagebox.askyesnocancel(message="Comenzará la calibración", title="Título"))
@@ -692,14 +687,12 @@ class MakeExperiment(Training):
                         currentFeatures = self.get_features( np.array( (pupilOffsetXYList[0], pupilOffsetXYList[1]) ))
                         gazeCoords = currentFeatures.dot(HT)
                         crosshair.drawCrossAt((gazeCoords[0,0], gazeCoords[0,1]))
-                        print(gazeCoords[0,0], gazeCoords[0,1])
                         coords.append({
                             'fixation_number': fixations, 
                             'x': gazeCoords[0,0],
                             'y': gazeCoords[0,1] #las fijaciones son los puntos que detecta la aplicacion que un usuario mira
                         })
                         fixations += 1
-                    print("coords : ", coords)
                 self.readSuccessful, frame = vc.read()        
         
             crosshair.write() #writes data to a csv for MATLAB
