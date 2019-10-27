@@ -21,6 +21,9 @@
 				<div class="row border border-primary pt-3 pb-3 rounded">
 					<div class="col-3 border-right border-dark p-3">
 						<img src="{{ image.image.url }}" class="col-12" />
+						{% if image.rectangles.exists %}
+							<a href="{% url 'rectangles' image.id %}" class="btn btn-success mt-3" style="width: 100%;">Ver clasificacion.</a>
+						{% endif %}
 					</div>
 					<div class="col-6">
 						<p class="text-lg-left font-weight-bold">{{ image.name }}</p>

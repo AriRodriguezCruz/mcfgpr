@@ -60,6 +60,13 @@ class ImageClasificarView(BaseView):
 		return redirect(reverse("images"))
 
 
+class ImageRectanglesView(BaseView):
+	template = "eyedetector/canvas.html"
+
+	def get(self, request, *args, **kwargs):
+		return render(request, self.template, locals())
+
+
 class ExperimentView(BaseView):
 
 	template = "eyedetector/experiment.html"

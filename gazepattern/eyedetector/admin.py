@@ -39,8 +39,9 @@ class ExperimentPointCSVAdmin(admin.ModelAdmin):
 
 
 class ExperimentPointAdmin(admin.ModelAdmin):
-    list_display = ['id', 'fixation_number', 'x', 'y']
+    list_display = ['id', 'experiment_id', 'fixation_number', 'x', 'y']
     ordering = ['id']
+    search_fields = ["experiment__id"]
 
 
 class ImageAdmin(admin.ModelAdmin):
@@ -54,15 +55,15 @@ class ExperimentAdmin(admin.ModelAdmin):
 
 
 class ImageRectangleAdmin(admin.ModelAdmin):
-
-    list_display = ['id', 'name']
+    list_display = ['id', 'image_id','name']
     ordering = ['id']
+    search_fields = ['image__id']
 
 
 class ExperimentFunctionAdmin(admin.ModelAdmin):
-
-    list_display = ['id', 'function']
+    list_display = ['id', 'experiment_id', 'function']
     ordering = ['id']
+    search_fields = ['experiment__id']
 
 
 admin.site.register(ExperimentPointCSV, ExperimentPointCSVAdmin)
