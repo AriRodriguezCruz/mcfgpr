@@ -15,7 +15,7 @@
 	<script>	
 		var canvas = document.getElementById("canvas")
 		var ctx = canvas.getContext("2d")
-		ctx.font="2em Verdana"
+		ctx.font="3em Arial"
 		ctx.textAlign = "center"
 		var img = new Image()
 		var src = canvas.getAttribute("image_url")
@@ -40,7 +40,7 @@
 
 						let horizontal_center = x + (height / 2)
 						let vertical_center = y + (width / 2)
-						
+
 						context.strokeRect(x, y, width, height)
 						context.fillText(result.name , horizontal_center, vertical_center, width );
 					})
