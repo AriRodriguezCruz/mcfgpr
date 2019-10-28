@@ -7,7 +7,7 @@ from django.db import transaction
 #gazepattern
 from utils.views import BaseView
 from eyedetector.forms import ImageForm, MakeExperimentForm, GenerateResultsForm
-from eyedetector.models import Image, Experiment, ExperimentFunction
+from eyedetector.models import Image, Experiment, ExperimentFunction, ImageRectangle
 from gui.application import Application
 from gui.experiment import CheckCamera, Training, MakeExperiment, GenerateResults
 
@@ -63,8 +63,15 @@ class ImageClasificarView(BaseView):
 class ImageRectanglesView(BaseView):
 	template = "eyedetector/canvas.html"
 
-	def get(self, request, *args, **kwargs):
-		return render(request, self.template, locals())
+	def get_context(self, request, image_id):
+		context = {}
+		context["rectangles"] = ImageRectangle.objects.all()
+		context['image'] = Image.objects.get(pk=image_id)
+		return context
+
+	def get(self, request, image_id):
+		context = self.get_context(request, image_id)
+		return render(request, self.template, context)
 
 
 class ExperimentView(BaseView):

@@ -24,6 +24,28 @@ class ImageRectangle(models.Model):
 	def __str__(self):
 		return '<a href="/admin/eyedetector/image/{}/">{}<a/> -- {}'.format(self.image.pk, self.image.pk, self.name)
 
+	@property
+	def get_x(self):
+		x = self.x0 if self.x0 < self.x1 else self.x1
+		return x / self.image.image.width
+	
+	@property
+	def get_y(self):
+		y = self.y0 if self.y0 < self.y1 else self.y1
+		return y / self.image.image.height
+
+	@property
+	def width(self):
+		width = abs(self.x0 - self.x1)
+		percent = width / self.image.image.width
+		return percent
+
+	@property
+	def height(self):
+		height = abs(self.y0 - self.y1)
+		percent = height / self.image.image.height
+		return percent
+
 
 class XYPupilFrame(models.Model):
 	x = models.DecimalField(max_digits=50, decimal_places=30)
