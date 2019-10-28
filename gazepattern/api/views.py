@@ -6,7 +6,7 @@ from django.shortcuts import render
 # - - -
 #gazepattern
 from utils.views import ApiView
-from eyedetector.models import Image
+from eyedetector.models import Image, Experiment
 
 
 class RectanglesView(ApiView):
@@ -28,3 +28,22 @@ class RectanglesView(ApiView):
 		response = {"results": results}
 
 		return response
+
+
+class PointsView(ApiView):
+
+	def json(self, request, experiment_id):
+		experiment = Experiment.objects.get(pk=experiment_id)
+		points = experiment.points.all().order_by("fixation_number")
+		results = [
+			{
+				"id": point.pk,
+				"x": point.get_x,
+				"y": point.get_y,
+			} for point in points
+		]
+
+		response = {"results": results}
+
+		return response
+

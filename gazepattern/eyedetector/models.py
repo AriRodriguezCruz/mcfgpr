@@ -73,6 +73,14 @@ class ExperimentPoint(models.Model):
 	x = models.DecimalField(max_digits=50, decimal_places=30)
 	y = models.DecimalField(max_digits=50, decimal_places=30) 
 
+	@property
+	def get_x(self):
+		return self.x / self.experiment.image.image.width
+
+	@property
+	def get_y(self):
+		return self.y / self.experiment.image.image.height
+
 
 class ExperimentFunction(models.Model):
 	experiment = models.ForeignKey(Experiment, blank=True, null=True, on_delete=models.CASCADE, related_name="experimentfunctions")

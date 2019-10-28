@@ -19,6 +19,7 @@
 					{% if experiment.image.rectangles.exists %}
 						<a href="{% url 'rectangles' experiment.image.id %}" class="btn btn-success mt-3" style="width: 100%;" target="_blank">Ver clasificacion.</a>
 					{% endif %}
+					<a href="{% url 'points' experiment.id %}" class="btn btn-success mt-3" style="width: 100%;" target="_blank">Ver fijaciones</a>
 				</div>
 				<div class="col-6">
 					<p class="text-lg-left font-weight-bold">{{ experiment.name }}</p>

@@ -1,0 +1,85 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>GAZE PATTERN</title>
+	<link rel="stylesheet" href="{% static 'css/canvas.css' %}">
+</head>
+<body>
+	<canvas id="canvas" image_url="{{ image.image.url }}", image_id="{{ image.pk }}" experiment_id="{{ experiment.pk }}" width="1500" height="1000">
+		Parece que tu navegador no soporte el elemento canvas, por favor 
+		intenta actualizando o cambiandote a un navegador mas moderno.
+	</canvas>
+
+	<script>	
+		var canvas = document.getElementById("canvas")
+		var ctx = canvas.getContext("2d")
+		ctx.font="3em Arial"
+		ctx.textAlign = "center"
+		var img = new Image()
+		var src = canvas.getAttribute("image_url")
+		img.src = src
+
+		var dibujarFijaciones = () => {
+			let experiment_id = canvas.getAttribute("experiment_id")
+			let url = `/api/points/${experiment_id}/`
+			fetch(url)
+				.then(response => {
+					return response.json()
+				}).then(json => {
+
+					json.results.forEach(result => {
+						let percent_x = parseFloat(result.x)
+						let percent_y = parseFloat(result.y)
+						let x = canvas.width * percent_x
+						let y = canvas.height * percent_y
+						//ctx.arc(x, y, 10, 0, (Math.PI/180)*360, true);
+					    ctx.fillRect(x,y,15,15);
+					})
+
+					ctx.strokeStyle = "#f00";
+					ctx.lineWidth = 3;
+					ctx.stroke();
+				})
+
+		} // end function
+
+		var cargarPuntos = (context, image_id) => {
+			let url = `/api/rectangles/${image_id}/`
+			fetch(url)
+				.then(response => {	
+					return response.json()
+				}).then(json => {
+					json.results.forEach(result => {
+						let percent_x = parseFloat(result.x)
+						let percent_y = parseFloat(result.y)
+						let percent_width = parseFloat(result.width)
+						let percent_height = parseFloat(result.height)
+
+						let x = canvas.width * percent_x
+						let y = canvas.height * percent_y
+						let width = canvas.width * percent_width
+						let height = canvas.height * percent_height
+
+						context.strokeRect(x, y, width, height)
+					})
+					dibujarFijaciones()
+				}).catch(response => {
+					alert("Ocuriro un error :(")
+				})
+		} // end function
+
+		var cargarImagen = (context, image) => {
+			image.onload = function(){
+  				context.drawImage(image, 0, 0, canvas.width, canvas.height)
+  				let id = canvas.getAttribute("image_id")
+  				cargarPuntos(context, id)
+			}
+		} // end function
+
+		cargarImagen(ctx, img)
+		
+	</script>
+</body>
+</html>

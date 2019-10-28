@@ -87,6 +87,22 @@ class ExperimentView(BaseView):
 		return context
 
 
+class ExperimentPointsView(BaseView):
+	template = "eyedetector/fijaciones.html"
+
+	def get_context(self, request, experiment_id):
+		experiment = Experiment.objects.get(pk=experiment_id)
+		context = {
+			"experiment": experiment,
+			"image": experiment.image,
+		}
+		return context
+
+	def get(self, request, experiment_id):
+		context = self.get_context(request, experiment_id)
+		return render(request, self.template, context)
+
+
 class CheckCameraView(BaseView):
 	template = "generic_template.html"
 

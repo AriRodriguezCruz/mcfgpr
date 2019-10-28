@@ -8,5 +8,6 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-	path("rectangles/<int:object_id>/", views.RectanglesView.as_view(), name="rectangles")
+	path("rectangles/<int:object_id>/", views.RectanglesView.as_view(), name="rectangles"),
+	path("points/<int:object_id>/", views.PointsView.as_view(), name="points"),
 ]
