@@ -1,4 +1,4 @@
-Django==2.2.5
+Django==2.2.22
 lark-parser==0.7.5
 numpy==1.17.1
 opencv-contrib-python==3.4.2.17
