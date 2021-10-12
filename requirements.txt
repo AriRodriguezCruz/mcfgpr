@@ -2,7 +2,7 @@ Django==2.2.5
 lark-parser==0.7.5
 numpy==1.17.1
 opencv-contrib-python==3.4.2.17
-opencv-python==3.4.2.17
+opencv-python==3.4.7.28
 Pillow==6.1.0
 pkg-resources==0.0.0
 pygame==1.9.6
